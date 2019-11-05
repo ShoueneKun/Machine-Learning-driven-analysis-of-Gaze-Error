@@ -17,6 +17,7 @@ PrTest_List = [1, 2, 3, 8, 9, 12, 16, 17, 22];
 
 comb_win = 0:3:24;
 
+parpool('local', 36)
 for PrTest_idx = 1:length(PrTest_List)
     strictCond = 1;
     PrTest = PrTest_List(PrTest_idx);
@@ -118,10 +119,12 @@ for PrTest_idx = 1:length(PrTest_List)
         % Prior -> Equal priors means it's equally likely for a sample to be
         % fixation, saccade or SP.
         PriorVec = [];
+        
+        paroptions = statset('UseParallel', true);
         Model = TreeBagger(40, TrainingData, TrainingTargets, 'MinLeafSize', 30,...
             'NumPredictorsToSample', ceil(sqrt(size(TrainingData, 2))), ...
             'W', TrainingWeights, 'OOBPredictorImportance', 'on', ...
-            'Prior', 'uniform', 'PruneCriterion', 'error');
+            'Prior', 'uniform', 'PruneCriterion', 'error', 'Options', paroptions);
 
         PredImp = Model.OOBPermutedPredictorDeltaMeanMargin;
         Model = compact(Model);
@@ -138,7 +141,7 @@ for PrTest_idx = 1:length(PrTest_List)
         disp(['Recall: ', mat2str(C_stats.sensitivity)])
         disp(['Precision: ', mat2str(C_stats.precision)])
         disp(['K: ', num2str(C_stats.k)])
-        saveName = sprintf('%s/Tree_Models/Tree_%d_%d_PrTest_%d.mat', pwd, preWin, postWin, PrTest);
+        saveName = sprintf('%s/RF_Models/Tree_%d_%d_PrTest_%d.mat', pwd, preWin, postWin, PrTest);
         parsave(saveName, 'Model', Model, 'C_stats', C_stats, 'PredImp', PredImp)
     end
     disp(['Finished PrTest: ', num2str(PrTest_List(PrTest_idx))])

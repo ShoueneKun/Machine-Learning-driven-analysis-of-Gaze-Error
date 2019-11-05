@@ -4,11 +4,11 @@
 #SBATCH --error=rc_log/RF.err
 #SBATCH --mail-user rsk3900@rit.edu
 #SBATCH --mail-type=ALL
-#SBATCH --mem=128G
+#SBATCH --mem=360G
 #SBATCH --nodes=1
 #SBATCH -t 2-4:0
-#SBATCH -p tier3 -A riteyes -n 1
+#SBATCH -p tier3 -A riteyes -n 36
 
 # Loading MATLAB
 module load matlab
-matlab --nodesktop --nosplash --nodisplay < RF_Model.m
+matlab -nodesktop -nosplash -nodisplay < RF_Model.m
