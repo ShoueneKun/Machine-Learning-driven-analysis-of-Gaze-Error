@@ -4,6 +4,9 @@ clc
 %% This file is to train a Random Forest algorithm with boosting.
 % Note that the optokinetic fixations are labelled as part of fixations.
 % Hence all samples with label 5 are changed to 1.
+
+path2repo = '/home/rsk3900/gaze-in-wild';
+addpath(genpath(fullfile(path2repo, 'SupportFunctions')))
 format long g
 
 global kappaTalk
@@ -13,11 +16,7 @@ strictCond = 1;
 PrTest_List = [1, 2, 3, 8, 9, 12, 16, 17, 22];
 
 comb_win = 0:3:24;
-% Win_List{1} = [0:3:24]; Win_List{2} = [0:3:24]; Win_List{3} = [0:3:24];
-% Win_List{4} = [0:3:24]; Win_List{5} = [0:3:24]; Win_List{6} = [0:3:24];
-% Win_List{7} = [0:3:24]; Win_List{8} = [0:3:24]; Win_List{9} = [0:3:24];
-%Win_List{10} = [0:3:24];% Win_List{11} = [0:3:21]; Win_List{12} = [0:3:21];
-%%
+
 for PrTest_idx = 1:length(PrTest_List)
     strictCond = 1;
     PrTest = PrTest_List(PrTest_idx);
