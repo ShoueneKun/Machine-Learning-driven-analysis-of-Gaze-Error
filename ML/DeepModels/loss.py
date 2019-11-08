@@ -1,7 +1,7 @@
 import torch
 import sklearn
 import numpy as np
-from event_based_metric.ELC import elc
+from elc_metric.ELC import elc
 
 # Metrics
 def getPerformance(y_true, y_pred, calc_evt):
