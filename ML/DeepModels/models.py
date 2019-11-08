@@ -8,6 +8,7 @@ Created on Thu Nov  7 11:57:48 2019
 import torch
 import torch.nn.functional as F
 from ModelHelpers import linStack, weights_init
+from loss import loss_giw
 
 class model_1(torch.nn.Module):
     # Bi-directional linear LSTM for GIW paper
@@ -25,18 +26,15 @@ class model_1(torch.nn.Module):
         self.fc = torch.nn.Linear(12*2, 3)
         self = weights_init(self)
 
-    def forward(self, x):
+    def forward(self, x, target, weight):
         # All packing and unpacking will be done inside forward
-        if type(x) is list:
-            x = torch.nn.utils.rnn.pad_sequence(x, batch_first=True, padding_value=0)
-        else:
-            x = x.unsqueeze(0)
-        x = x.cuda()/700
+        x = x[:,:,:6].cuda()/700
         # The data structure at this point is (batch, sequence, features)
         x = self.linear_stack(x)
         x, _ = self.RNN_stack(x)
         x = self.fc(x) + 0.00001 # Adding a small eps paramter
-        return x
+        loss = loss_giw(x.permute(0, 2, 1), target, weight, -1)
+        return x, loss.unsqueeze(0)
 
 class model_2(torch.nn.Module):
     # Bi-directional with Conv layers - current SOTA
@@ -44,24 +42,20 @@ class model_2(torch.nn.Module):
         super(model_2, self).__init__()
         self.d1 = torch.nn.Conv1d(in_channels=6, out_channels=8, kernel_size=3, padding=1)
         self.bn1 = torch.nn.BatchNorm1d(num_features=8)
-        self.d2 = torch.nn.Conv1d(in_channels=8, out_channels=16, kernel_size=3, padding=1)
-        self.bn2 = torch.nn.BatchNorm1d(num_features=16)
-        self.d3 = torch.nn.Conv1d(in_channels=16, out_channels=8, kernel_size=1, padding=0)
+        self.d2 = torch.nn.Conv1d(in_channels=8, out_channels=8, kernel_size=3, padding=1)
+        self.bn2 = torch.nn.BatchNorm1d(num_features=8)
+        self.d3 = torch.nn.Conv1d(in_channels=8, out_channels=8, kernel_size=3, padding=1)
         self.bn3 = torch.nn.BatchNorm1d(num_features=8)
         self.RNN_stack = torch.nn.GRU(input_size=8+6,
                                       hidden_size=12,
-                                      num_layers=1,
+                                      num_layers=2,
                                       batch_first=True,
                                       bidirectional=True)
         self.fc = torch.nn.Linear(12*2, 3)
 
-    def forward(self, x):
+    def forward(self, x, target, weight):
         # All packing and unpacking will be done inside forward
-        if type(x) is list:
-            x = torch.nn.utils.rnn.pad_sequence(x, batch_first=True, padding_value=0)
-        else:
-            x = x.unsqueeze(0)
-        x = x.to(self.device)/700 # Divide by 700 ensures abs(signal) < 1
+        x = x[:,:,:6].cuda()/700 # Divide by 700 ensures abs(signal) < 1
         # The data structure at this point is (batch, sequence, features)
         x_in = x.permute(0, 2, 1)
         x = F.leaky_relu(self.bn1(self.d1(x_in)))
@@ -71,4 +65,5 @@ class model_2(torch.nn.Module):
         x = x.permute(0, 2, 1)
         x, _ = self.RNN_stack(x)
         x = self.fc(x) + 0.00001 # Adding a small eps paramter
-        return x
+        loss = loss_giw(x.permute(0, 2, 1), target, weight, -1)
+        return x, loss.unsqueeze(0)
