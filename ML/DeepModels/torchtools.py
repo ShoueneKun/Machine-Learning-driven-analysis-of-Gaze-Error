@@ -48,7 +48,7 @@ class EarlyStopping:
 
         if self.best_score is None:
             self.best_score = score
-            self.save_checkpoint(val_loss, model)
+            best_model = self.save_checkpoint(eps, val_loss, model, best_model)
         elif score < self.best_score - self.delta:
             self.counter += 1
             print('EarlyStopping counter: {} out of {}'.format(self.counter, self.patience))
@@ -69,5 +69,5 @@ class EarlyStopping:
 
         best_model['net_params'] = model_dict
         best_model['eps'] = eps
-        best_model['val_loss'] = val_loss
+        best_model['metric'] = val_loss
         return best_model

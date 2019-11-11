@@ -57,8 +57,8 @@ def dataGen(Chunks, Data, Targets, Weights, ID, prec):
         # Unpack series
         SeriesTensors['vec'].append(torch.from_numpy(np.asarray(Data[i])[:, :9]).to(prec))
         SeriesTensors['vel'].append(torch.from_numpy(np.asarray(Data[i])[:, 9:]).to(prec))
-        SeriesTensors['targets'].append(torch.from_numpy(np.asarray(Targets[i])).to(torch.long))
-        SeriesTensors['weights'].append(torch.from_numpy(np.asarray(Weights[i])).to(prec))
+        SeriesTensors['targets'].append(torch.from_numpy(np.asarray(Targets[i])).squeeze().to(torch.long))
+        SeriesTensors['weights'].append(torch.from_numpy(np.asarray(Weights[i])).squeeze().to(prec))
         SeriesTensors['lens'].append(len(Targets[i]))
         SeriesTensors['freq'].append(calcfreq(Targets[i]))
         SeriesTensors['id'].append(np.asarray(ID)[i, :])

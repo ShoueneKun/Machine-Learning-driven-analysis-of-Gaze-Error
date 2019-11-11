@@ -9,9 +9,11 @@ Created on Thu Nov  7 10:13:08 2019
 import os
 import torch
 import pickle
+import datetime
 from args import parse_args
 from opts import train, test
 from models import model_1, model_2
+from tensorboardX import SummaryWriter
 from DataLoader import splitdata, GIW_readChunk, GIW_readSeq
 
 if __name__=='__main__':
@@ -34,6 +36,9 @@ if __name__=='__main__':
                                              batch_size=1,
                                              num_workers=1)
 
+    # Create summary writer
+    now = datetime.datetime.now()
+    TBwriter = SummaryWriter(os.path.join(os.getcwd(), 'TB.lock', str(now)))
     for k in range(0, args.folds):
         print('Fold: {}'.format(k))
         trainObj = GIW_readChunk(chunk, trainIdx[k])
@@ -57,19 +62,24 @@ if __name__=='__main__':
             args.multiGPU = 0
             print('Training on 1 GPU.')
 
-        net, perf_valid = train(net, trainloader, validloader, args)
-        perf_test = test(net, testloader, args)
-        print('Best valid kappa: {}'.format(perf_valid['kappa']))
-        print('Best test kappa: {}'.format(perf_test['kappa']))
+        perf_valid, best_model = train(net, trainloader, validloader, testloader, TBwriter, args)
+        _, perf_test = test(net.load_state_dict(best_model['net_params']), testloader, args)
 
+        print('Best valid kappa: {}'.format(best_model['metric']))
+        print('Best test kappa: {}'.format(perf_test.getPerf(0, 'kappa')))
+
+        '''
         if args.multiGPU:
             print('Moving to single GPU.')
             print('Saving ...')
-            state_dict = net.module.state_dict()
+            #state_dict = net.module.state_dict()
+
         else:
             print('Saving ...')
             state_dict = net.state_dict()
+        '''
 
+        best_model['net_params'] = best_model['net_params'].cpu()
         path2save = os.path.join(os.getcwd(), 'weights', 'model_{}_fold_{}.pt'.format(args.modeltype, k))
-        torch.save(state_dict.cpu(), path2save)
+        torch.save(best_model, path2save)
 

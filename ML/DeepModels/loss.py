@@ -20,14 +20,15 @@ def getPerformance(y_true, y_pred, calc_evt):
     Perf['recall'] = sklearn.metrics.recall_score(y_true, y_pred, average=None, labels=[0,1,2])
     Perf['mpcr'] = sklearn.metrics.recall_score(y_true, y_pred, average='macro', labels=[0,1,2])
     Perf['iou'] = sklearn.metrics.jaccard_score(y_true, y_pred, average='macro', labels=[0,1,2])
+    Perf['iou_class'] = sklearn.metrics.jaccard_score(y_true, y_pred, average=None, labels=[0,1,2])
 
     if calc_evt:
         cmat_list = [elc(y_true[i, ...].squeeze(), y_pred[i, ...].squeeze(), 15)[2] for i in range(0, y_true.shape[0])]
         Perf['kappa_evt'] = np.mean([kappa_confusion(cmat) for cmat in cmat_list])
         Perf['kappa_class_evt'] = np.mean(np.stack([kappa_perClass(cmat) for cmat in cmat_list], axis=0), axis=0)
     else:
-        Perf['kappa_evt'] = []
-        Perf['kappa_class_evt'] = []
+        Perf['kappa_evt'] = 0
+        Perf['kappa_class_evt'] = np.array([0, 0, 0])
 
     return Perf
 

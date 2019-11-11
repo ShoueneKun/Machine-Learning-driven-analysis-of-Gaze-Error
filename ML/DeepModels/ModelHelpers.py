@@ -31,7 +31,7 @@ class linStack(nn.Module):
             #x = x.permute(0, 2, 1) # (batch, features, sequence)
             #x = self.layersNorm[i](x)
             #x = x.permute(0, 2, 1) # (batch, sequence, features)
-            x = F.relu(x)
+            x = F.tanh(x)
         return x
 
 class gruStack(nn.Module):
