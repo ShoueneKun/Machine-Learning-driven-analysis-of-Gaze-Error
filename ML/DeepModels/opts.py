@@ -63,7 +63,6 @@ def update_tensorboard(TBwriter, trainTrack, validTrack, testTrack, eps):
                                   'valid': validTrack.getPerf(eps, 'loss'),
                                   'test': testTrack.getPerf(0, 'loss')}, eps)
 
-
     TBwriter.add_scalars('kappa', {'train': trainTrack.getPerf(eps, 'kappa'),
                                    'valid': validTrack.getPerf(eps, 'kappa'),
                                    'test': testTrack.getPerf(0, 'kappa')}, eps)
@@ -84,7 +83,6 @@ def update_tensorboard(TBwriter, trainTrack, validTrack, testTrack, eps):
                                    'valid': validTrack.getPerf(eps, 'iou_class')[2],
                                    'test': testTrack.getPerf(0, 'iou_class')[2]}, eps)
     return []
-
 
 def test(net, testloader, args):
     testTrack = trackPerf()

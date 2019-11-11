@@ -68,17 +68,6 @@ if __name__=='__main__':
         print('Best valid kappa: {}'.format(best_model['metric']))
         print('Best test kappa: {}'.format(perf_test.getPerf(0, 'kappa')))
 
-        '''
-        if args.multiGPU:
-            print('Moving to single GPU.')
-            print('Saving ...')
-            #state_dict = net.module.state_dict()
-
-        else:
-            print('Saving ...')
-            state_dict = net.state_dict()
-        '''
-
         best_model['net_params'] = best_model['net_params'].cpu()
         path2save = os.path.join(os.getcwd(), 'weights', 'model_{}_fold_{}.pt'.format(args.modeltype, k))
         torch.save(best_model, path2save)

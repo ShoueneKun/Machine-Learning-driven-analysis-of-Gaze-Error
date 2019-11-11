@@ -12,3 +12,5 @@
 *.avi
 *.pkl
 *.lock
+*.pyc
+*/__pycache__/*
