@@ -38,8 +38,8 @@ if __name__=='__main__':
 
     # Create summary writer
     now = datetime.datetime.now()
-    TBwriter = SummaryWriter(os.path.join(os.getcwd(), 'TB.lock', str(now)))
     for k in range(0, args.folds):
+        TBwriter = SummaryWriter(os.path.join(os.getcwd(), 'TB.lock', '{}_{}_'.format(args.modeltype, k)+str(now)))
         print('Fold: {}'.format(k))
         trainObj = GIW_readChunk(chunk, trainIdx[k])
         validObj = GIW_readChunk(chunk, validIdx[k])

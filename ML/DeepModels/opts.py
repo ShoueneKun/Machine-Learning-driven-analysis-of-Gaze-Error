@@ -6,7 +6,7 @@ from torchtools import EarlyStopping
 def train(net, trainloader, validloader, testloader, TBwriter, args):
     cond = EarlyStopping(patience=50, mode='max')
     best_model = dict()
-    optimizer = torch.optim.Adam(net.parameters(), lr=args.lr, weight_decay=1e-4)
+    optimizer = torch.optim.Adam(net.parameters(), lr=args.lr, weight_decay=0)
 
     validTrack = trackPerf()
     trainTrack = trackPerf()
