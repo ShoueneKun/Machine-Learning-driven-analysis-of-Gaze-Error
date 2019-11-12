@@ -63,12 +63,12 @@ if __name__=='__main__':
             print('Training on 1 GPU.')
 
         perf_valid, best_model = train(net, trainloader, validloader, testloader, TBwriter, args)
-        _, perf_test = test(net.load_state_dict(best_model['net_params']), testloader, args)
+        net.load_state_dict(best_model['net_params'])
+        _, perf_test = test(net, testloader, args)
 
         print('Best valid kappa: {}'.format(best_model['metric']))
         print('Best test kappa: {}'.format(perf_test.getPerf(0, 'kappa')))
 
-        best_model['net_params'] = best_model['net_params'].cpu()
         path2save = os.path.join(os.getcwd(), 'weights', 'model_{}_fold_{}.pt'.format(args.modeltype, k))
         torch.save(best_model, path2save)
 
