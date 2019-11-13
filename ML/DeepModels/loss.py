@@ -72,7 +72,7 @@ def loss_giw(ip, target, weight, ignore_index):
     loss1 = torch.mean(loss_ce(ip, target, weight, ignore_index))
     GD = GeneralizedDiceLoss(ignore_index=ignore_index).cuda()
     loss2 = GD(ip, target)
-    loss = loss1 + loss2
+    loss = loss1 + 10*loss2
     return loss
 
 def loss_ce(ip, target, weight, ignore_index):

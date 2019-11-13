@@ -69,6 +69,6 @@ if __name__=='__main__':
         print('Best valid kappa: {}'.format(best_model['metric']))
         print('Best test kappa: {}'.format(perf_test.getPerf(0, 'kappa')))
 
-        path2save = os.path.join(os.getcwd(), 'weights', 'model_{}_fold_{}.pt'.format(args.modeltype, k))
+        path2save = os.path.join(os.getcwd(), 'weights', 'PrTest_{}_model_{}_fold_{}.pt'.format(args.PrTest, args.modeltype, k))
         torch.save(best_model, path2save)
 
