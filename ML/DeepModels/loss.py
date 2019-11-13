@@ -70,9 +70,9 @@ def kappa_confusion(cmat):
 # Loss functions
 def loss_giw(ip, target, weight, ignore_index):
     loss1 = torch.mean(loss_ce(ip, target, weight, ignore_index))
-    GD = GeneralizedDiceLoss(ignore_index=ignore_index).cuda()
-    loss2 = GD(ip, target)
-    loss = loss1 + 10*loss2
+    #GD = GeneralizedDiceLoss(ignore_index=ignore_index).cuda()
+    #loss2 = GD(ip, target)
+    loss = loss1 #+ 10*loss2
     return loss
 
 def loss_ce(ip, target, weight, ignore_index):
@@ -106,7 +106,7 @@ class GeneralizedDiceLoss(torch.nn.Module):
         mask = torch.stack(mask, dim=1)
         mask.requires_grad = False
 
-        ip = ip * mask.to(torch.float)
+        ip = ip*mask.to(torch.float)
 
         # Rapid way to convert to one-hot. For future version, use functional
         Label = (np.arange(3) == target.cpu().numpy()[..., None]).astype(np.uint8)

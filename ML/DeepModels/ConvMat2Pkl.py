@@ -10,6 +10,7 @@ import numpy as np
 import pickle
 import torch
 import itertools
+import copy
 import os
 DATA_PATH = os.getcwd()
 
@@ -17,6 +18,26 @@ class makeparams():
     def __init__(self):
         self.PrTest_List = [1, 2, 3, 8, 9, 12, 16, 17, 22]
         self.prec = torch.float32
+
+def upsample(Chunks, ratio=1):
+    class_rat = np.stack(Chunks['freq'], axis=0)
+    loc = np.where(class_rat[:, 1] > 0.1)[0] # All pursuit samples
+    print('Ratio of pursuit chunks: {}'.format(100*np.sum(class_rat[:, 1])/class_rat.shape[0]))
+    Chunks_append = {key:[] for key in Chunks.keys()}
+    for key in Chunks.keys():
+        for idx in loc:
+            Chunks_append[key].append(Chunks[key][idx])
+    list_dict = list(copy.deepcopy(Chunks_append) for i in range(0, 8))
+    list_dict.append(Chunks)
+    D = concat_dicts(list_dict)
+    return D
+
+def concat_dicts(list_dict):
+    D = {key:[] for key in list_dict[0].keys()}
+    for key in D.keys():
+        temp = list(d[key] for d in list_dict)
+        D[key] = list(itertools.chain(*temp))
+    return D
 
 def extract(data, prec):
     # Split a chunk into data, targets and class counts.
@@ -80,6 +101,7 @@ def dataGen(Chunks, Data, Targets, Weights, ID, prec):
     ChunkTensors['freq'] = list(itertools.chain(*ChunkTensors['freq']))
     ChunkTensors['id'] = list(itertools.chain(*ChunkTensors['id']))
     ChunkTensors['weights'] = list(itertools.chain(*ChunkTensors['weights']))
+
     return ChunkTensors, SeriesTensors
 
 # Load MATLAB
@@ -99,5 +121,7 @@ Weights = Dataset['Weights']
 ID = np.asarray(Dataset['ID'])
 
 SeqTensors, SeriesTensors = dataGen(Chunks, Data, Targets, Weights, ID, params.prec)
+SeqTensors = upsample(SeqTensors)
 f = open(os.path.join(DATA_PATH, 'Data', 'Data.pkl'), 'wb')
 pickle.dump([SeqTensors, SeriesTensors], f)
+

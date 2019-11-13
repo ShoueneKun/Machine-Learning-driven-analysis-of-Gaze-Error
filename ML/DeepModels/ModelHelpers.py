@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 class linStack(nn.Module):
     """A stack of linear layers followed by batch norm and hardTanh
@@ -31,7 +30,7 @@ class linStack(nn.Module):
             #x = x.permute(0, 2, 1) # (batch, features, sequence)
             #x = self.layersNorm[i](x)
             #x = x.permute(0, 2, 1) # (batch, sequence, features)
-            x = F.tanh(x)
+            x = torch.tanh(x)
         return x
 
 class gruStack(nn.Module):

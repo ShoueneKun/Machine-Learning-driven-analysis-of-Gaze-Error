@@ -19,7 +19,7 @@ function [trainData, Targets, Chunks, W] = genSeqSeries(ExpData, W_ip)
 
 featSpace_vec = 2:10;
 featSpace_vel = [11, 14:15, 12, 16:17, 13, 18:19];
-MaxSeqLen = 240;
+MaxSeqLen = 512;
 W = W_ip;
 labels = fillGap(ExpData(:, 25), 5);
 
@@ -72,7 +72,6 @@ Chunks(loc) = [];
 
 trainData = ExpData(:, [featSpace_vec, featSpace_vel]);
 Targets = labels_mod(:);
-N = size(trainData, 1);
 
 function labels = convertLabels(labels)
     % Convert blinks and unlabelled as undefined
