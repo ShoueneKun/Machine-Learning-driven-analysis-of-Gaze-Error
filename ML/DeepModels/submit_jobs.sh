@@ -3,8 +3,8 @@
 spack load opencv ^python@3
 spack load /ou2ujbv # Load pytorch by hash
 spack load /5gjrsa2 # Load torchvision by hash
-spack load py-scipy ^python@3 # Load scipy
-spack load py-matplotlib ^python@3 # Load matplotlib
+spack load /b4lfddj # Load scipy
+spack load /5kmm4sh # Load matplotlib
 spack load py-scikit-image ^python@3 # Load image manipulation library
 spack load py-scikit-learn@0.21 # Load sklearn for metrics
 spack load py-tensorboardx
