@@ -54,8 +54,10 @@ def train(net, trainloader, validloader, testloader, TBwriter, args):
 
         # Update tensorboard
         update_tensorboard(TBwriter, trainTrack, validTrack, perf_test, eps)
-        TBwriter.close()
+        if cond.early_stop:
+            break
 
+    TBwriter.close()
     return validTrack, best_model
 
 def update_tensorboard(TBwriter, trainTrack, validTrack, testTrack, eps):

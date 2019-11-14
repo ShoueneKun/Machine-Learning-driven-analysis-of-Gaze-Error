@@ -52,6 +52,7 @@ if __name__=='__main__':
                                                   batch_size=args.batchsize,
                                                   num_workers=torch.cuda.device_count())
 
+        net = []
         net = model().cuda().to(torch.float32)
         torch.cuda.manual_seed(32)
         if torch.cuda.device_count() > 1:
