@@ -54,7 +54,7 @@ for i = 1:numSequences
         if any(abs(dataBoo(:)) > 1 ) || any(isnan(dataBoo(:))) || all(dataBoo(:) == 0) ||  all(W_ip(x:y) <= 0.1)
             keyboard
         end
-        % Append data to make sure that L + 3 is divisible by 4
+        % Append data to make sure that L + 3 is divisible by 4         
         temp = [dataBoo, dataBoo_vel, W_ip(x:y), labels_mod(x:y)];
         if size(temp, 1) < MaxSeqLen
            temp((1+size(temp, 1)):MaxSeqLen, end) = -1;

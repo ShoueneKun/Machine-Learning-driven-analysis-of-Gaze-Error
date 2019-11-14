@@ -4,7 +4,7 @@ from loss import getPerformance
 from torchtools import EarlyStopping
 
 def train(net, trainloader, validloader, testloader, TBwriter, args):
-    cond = EarlyStopping(patience=50, mode='max')
+    cond = EarlyStopping(patience=75, mode='max', delta=1.5e-2)
     best_model = dict()
     optimizer = torch.optim.Adam(net.parameters(), lr=args.lr, weight_decay=0)
 
@@ -15,7 +15,7 @@ def train(net, trainloader, validloader, testloader, TBwriter, args):
         for bt, data in enumerate(trainloader):
             optimizer.zero_grad()
             train_data, W, target = data
-            y, loss = net(train_data.cuda(), target.cuda(), W.cuda())
+            y, loss, loss_ce, loss_dl = net(train_data.cuda(), target.cuda(), W.cuda())
             loss = torch.sum(loss)
             loss.backward()
             optimizer.step()
@@ -24,6 +24,8 @@ def train(net, trainloader, validloader, testloader, TBwriter, args):
             gt = target.cpu().detach().numpy()
             perf = getPerformance(gt, pd, calc_evt=False)
             perf['loss'] = loss.detach().cpu().numpy()
+            perf['loss_ce'] = loss_ce
+            perf['loss_dl'] = loss_dl
             trainTrack.addEntry(eps, bt, perf)
 
         # Valid evaluation
@@ -31,11 +33,13 @@ def train(net, trainloader, validloader, testloader, TBwriter, args):
         with torch.no_grad():
             for bt, data in enumerate(validloader):
                 valid_data, W, target = data
-                y, loss = net(valid_data.cuda(), target.cuda(), W.cuda())
+                y, loss, loss_ce, loss_dl = net(valid_data.cuda(), target.cuda(), W.cuda())
                 pd = np.argmax(y.cpu().detach().numpy(), axis=2)
                 gt = target.cpu().detach().numpy()
                 perf = getPerformance(gt, pd, calc_evt=False)
                 perf['loss'] = loss.cpu().numpy()
+                perf['loss_ce'] = loss_ce
+                perf['loss_dl'] = loss_dl
                 validTrack.addEntry(eps, bt, perf)
 
         # Record best model
@@ -65,6 +69,14 @@ def update_tensorboard(TBwriter, trainTrack, validTrack, testTrack, eps):
                                   'valid': validTrack.getPerf(eps, 'loss'),
                                   'test': testTrack.getPerf(0, 'loss')}, eps)
 
+    TBwriter.add_scalars('loss/CE', {'train': trainTrack.getPerf(eps, 'loss_ce'),
+                                  'valid': validTrack.getPerf(eps, 'loss_ce'),
+                                  'test': testTrack.getPerf(0, 'loss_ce')}, eps)
+
+    TBwriter.add_scalars('loss/gDL', {'train': trainTrack.getPerf(eps, 'loss_dl'),
+                                  'valid': validTrack.getPerf(eps, 'loss_dl'),
+                                  'test': testTrack.getPerf(0, 'loss_dl')}, eps)
+
     TBwriter.add_scalars('kappa', {'train': trainTrack.getPerf(eps, 'kappa'),
                                    'valid': validTrack.getPerf(eps, 'kappa'),
                                    'test': testTrack.getPerf(0, 'kappa')}, eps)
@@ -92,11 +104,13 @@ def test(net, testloader, args):
     with torch.no_grad():
         for seqIdx, data in enumerate(testloader):
             test_data, W, target = data
-            y, loss = net(test_data.cuda(), target.cuda(), W.cuda())
+            y, loss, loss_ce, loss_dl = net(test_data.cuda(), target.cuda(), W.cuda())
             pd = np.argmax(y.cpu().detach().numpy(), axis=2)
             gt = target.cpu().detach().numpy()
             perf = getPerformance(gt, pd, calc_evt=False)
             perf['loss'] = loss.cpu().numpy()
+            perf['loss_ce'] = loss_ce
+            perf['loss_dl'] = loss_dl
             testTrack.addEntry(0, seqIdx, perf)
     print('eps: {}. k: {}. p: {}. r: {}. k_evt: {}'.format(
                 0,
@@ -111,6 +125,8 @@ class trackPerf():
         self.epoch = []
         self.bt = []
         self.loss = []
+        self.loss_ce = []
+        self.loss_dl = []
         self.kappa = []
         self.kappa_evt = []
         self.kappa_class_evt = []
@@ -124,6 +140,8 @@ class trackPerf():
         self.epoch.append(eps)
         self.bt.append(bt)
         self.loss.append(perf['loss'])
+        self.loss_ce.append(perf['loss_ce'])
+        self.loss_dl.append(perf['loss_dl'])
         self.kappa.append(perf['kappa'])
         self.kappa_evt.append(perf['kappa_evt'])
         self.kappa_class_evt.append(perf['kappa_class_evt'])

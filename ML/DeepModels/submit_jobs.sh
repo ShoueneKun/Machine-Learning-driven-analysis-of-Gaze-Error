@@ -19,5 +19,5 @@ for PrIdx in "${PrTest[@]}"
 do
     echo "Submitting $PrIdx"
     echo -e "#!/bin/bash \n python3 main.py --PrTest=${PrIdx} --lr=1e-5 --modeltype=${model_num} --batchsize=32 --epochs=1000" > command.lock
-    sbatch -J ${baseJobName} --output="rc_log/${PrIdx}.o" --error="rc_log/${PrIdx}.e" --mem=16G -n 1 -t 2-4:0:0 -p tier3 -A riteyes --gres=gpu:p4:1 --mail-user=rsk3900@rit.edu --mail-type=ALL command.lock
+    sbatch -J ${baseJobName} --output="rc_log/${PrIdx}.o" --error="rc_log/${PrIdx}.e" --mem=16G -n 1 -t 2-4:0:0 -p tier3 -A riteyes --gres=gpu:1 --mail-user=rsk3900@rit.edu --mail-type=ALL command.lock
 done

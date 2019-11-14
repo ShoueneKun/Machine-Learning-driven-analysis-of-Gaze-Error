@@ -73,7 +73,7 @@ def loss_giw(ip, target, weight, ignore_index):
     GD = GeneralizedDiceLoss(ignore_index=ignore_index).cuda()
     loss2 = GD(ip, target)
     loss = loss1 + loss2
-    return loss
+    return loss, loss1.detach().cpu().item(), loss2.detach().cpu().item()
 
 def loss_ce(ip, target, weight, ignore_index):
     # Computes the loss based on given input and target.

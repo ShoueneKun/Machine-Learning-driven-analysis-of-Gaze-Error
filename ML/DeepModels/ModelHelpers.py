@@ -10,27 +10,30 @@ class linStack(nn.Module):
         hidden_dim: the size of the hidden layers.
         out_dim: the size of the output.
     """
-    def __init__(self, num_layers, in_dim, hidden_dim, out_dim):
+    def __init__(self, num_layers, in_dim, hidden_dim, out_dim, dp):
         super().__init__()
 
         layers_lin = []
-        #layers_norm = []
+        layers_norm = []
         for i in range(num_layers):
             m = nn.Linear(hidden_dim if i > 0 else in_dim,
                 hidden_dim if i < num_layers - 1 else out_dim)
             layers_lin.append(m)
-            #layers_norm.append(nn.BatchNorm1d(hidden_dim if i < num_layers -1 else out_dim, affine=False))
+            layers_norm.append(nn.BatchNorm1d(hidden_dim if i < num_layers -1 else out_dim, affine=True))
         self.layersLin = nn.ModuleList(layers_lin)
-        #self.layersNorm = nn.ModuleList(layers_norm)
+        self.layersNorm = nn.ModuleList(layers_norm)
+        self.act_func = nn.LeakyReLU()
+        self.dp = nn.Dropout(p=dp)
 
     def forward(self, x):
         # Input shape (batch, sequence, features)
         for i, _ in enumerate(self.layersLin):
             x = self.layersLin[i](x)
-            #x = x.permute(0, 2, 1) # (batch, features, sequence)
-            #x = self.layersNorm[i](x)
-            #x = x.permute(0, 2, 1) # (batch, sequence, features)
-            x = torch.tanh(x)
+            x = x.permute(0, 2, 1) # (batch, features, sequence)
+            x = self.act_func(x)
+            x = self.layersNorm[i](x)
+            x = x.permute(0, 2, 1) # (batch, sequence, features)
+            x = self.dp(x)
         return x
 
 class gruStack(nn.Module):

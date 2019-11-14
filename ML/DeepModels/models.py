@@ -15,28 +15,27 @@ class model_1(torch.nn.Module):
     def __init__(self):
         super(model_1, self).__init__()
         self.num_layers = 3
-        self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=12*3, out_dim=24)
+        self.dp = 0.1
+        self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=24*3, out_dim=24, dp=self.dp)
         self.RNN_stack = torch.nn.GRU(input_size=24,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
                                       bidirectional=True,
-                                      dropout=0.0)
+                                      dropout=self.dp)
 
         self.fc = torch.nn.Linear(24*2, 3)
-        self.dp = torch.nn.dropout(p=0.1)
         self = weights_init(self)
 
     def forward(self, x, target, weight):
         # All packing and unpacking will be done inside forward
-        x = x[:,:,:6].cuda()/700
+        x = x[:,:,:6].cuda()/350
         # The data structure at this point is (batch, sequence, features)
         x = self.linear_stack(x)
         x, _ = self.RNN_stack(x)
-        x = self.dp(x)
         x = self.fc(x) + 0.00001 # Adding a small eps paramter
-        loss = loss_giw(x.permute(0, 2, 1), target, weight, -1)
-        return x, loss.unsqueeze(0)
+        loss, loss1, loss2 = loss_giw(x.permute(0, 2, 1), target, weight, -1)
+        return x, loss, loss1, loss2
 
 class model_2(torch.nn.Module):
     # Bi-directional with Conv layers - current SOTA
@@ -57,7 +56,7 @@ class model_2(torch.nn.Module):
 
     def forward(self, x, target, weight):
         # All packing and unpacking will be done inside forward
-        x = x[:,:,:6].cuda()/700 # Divide by 700 ensures abs(signal) < 1
+        x = x[:,:,:6].cuda()/350 # Divide by 700 ensures abs(signal) < 1
         # The data structure at this point is (batch, sequence, features)
         x_in = x.permute(0, 2, 1)
         x = F.leaky_relu(self.bn1(self.d1(x_in)))
@@ -67,9 +66,9 @@ class model_2(torch.nn.Module):
         x = x.permute(0, 2, 1)
         x, _ = self.RNN_stack(x)
         x = self.fc(x) + 0.00001 # Adding a small eps paramter
-        loss = loss_giw(x.permute(0, 2, 1), target, weight, -1)
-        return x, loss.unsqueeze(0)
-
+        loss, loss1, loss2 = loss_giw(x.permute(0, 2, 1), target, weight, -1)
+        return x, loss, loss1, loss2
+'''
 class model_3(torch.nn.Module):
     # RITnet - offline
     def __init__(self):
@@ -88,3 +87,4 @@ class model_3(torch.nn.Module):
 
 
     return x, loss.unsqeeze(0)
+'''
