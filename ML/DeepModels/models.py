@@ -15,15 +15,16 @@ class model_1(torch.nn.Module):
     def __init__(self):
         super(model_1, self).__init__()
         self.num_layers = 3
-        self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=12*3, out_dim=8)
-        self.RNN_stack = torch.nn.GRU(input_size=8,
-                                      hidden_size=12,
+        self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=12*3, out_dim=24)
+        self.RNN_stack = torch.nn.GRU(input_size=24,
+                                      hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
                                       bidirectional=True,
                                       dropout=0.0)
 
-        self.fc = torch.nn.Linear(12*2, 3)
+        self.fc = torch.nn.Linear(24*2, 3)
+        self.dp = torch.nn.dropout(p=0.1)
         self = weights_init(self)
 
     def forward(self, x, target, weight):
@@ -32,6 +33,7 @@ class model_1(torch.nn.Module):
         # The data structure at this point is (batch, sequence, features)
         x = self.linear_stack(x)
         x, _ = self.RNN_stack(x)
+        x = self.dp(x)
         x = self.fc(x) + 0.00001 # Adding a small eps paramter
         loss = loss_giw(x.permute(0, 2, 1), target, weight, -1)
         return x, loss.unsqueeze(0)
@@ -67,3 +69,22 @@ class model_2(torch.nn.Module):
         x = self.fc(x) + 0.00001 # Adding a small eps paramter
         loss = loss_giw(x.permute(0, 2, 1), target, weight, -1)
         return x, loss.unsqueeze(0)
+
+class model_3(torch.nn.Module):
+    # RITnet - offline
+    def __init__(self):
+
+
+
+
+
+    def forward(self, x, target, weight):
+
+
+
+
+
+
+
+
+    return x, loss.unsqeeze(0)
