@@ -12,7 +12,7 @@ import pickle
 import datetime
 from args import parse_args
 from opts import train, test
-from models import model_1, model_2, model_3
+from models import model_1, model_2, model_3, model_4, model_5
 from tensorboardX import SummaryWriter
 from DataLoader import splitdata, GIW_readChunk, GIW_readSeq
 
@@ -29,6 +29,12 @@ if __name__=='__main__':
     elif args.modeltype == 3:
         print('Model 3. GIW journal. Forward.')
         model = model_3
+    elif args.modeltype == 4:
+        print('Model 3. GIW journal. Only Eyes.')
+        model = model_4
+    elif args.modeltype == 5:
+        print('Model 3. GIW journal. Only Abs.')
+        model = model_5
 
     f = open(os.path.join(args.path2data, 'Data.pkl'), 'rb')
     chunk, seq = pickle.load(f)
