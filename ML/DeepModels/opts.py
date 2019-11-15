@@ -4,7 +4,7 @@ from loss import getPerformance
 from torchtools import EarlyStopping
 
 def train(net, trainloader, validloader, testloader, TBwriter, args):
-    cond = EarlyStopping(patience=75, mode='max', delta=1.5e-2)
+    cond = EarlyStopping(patience=75, mode='max', delta=1e-2)
     best_model = dict()
     optimizer = torch.optim.Adam(net.parameters(), lr=args.lr, weight_decay=0)
 

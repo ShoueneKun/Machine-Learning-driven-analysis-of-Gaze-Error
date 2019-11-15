@@ -22,7 +22,7 @@ class linStack(nn.Module):
             layers_norm.append(nn.BatchNorm1d(hidden_dim if i < num_layers -1 else out_dim, affine=True))
         self.layersLin = nn.ModuleList(layers_lin)
         self.layersNorm = nn.ModuleList(layers_norm)
-        self.act_func = nn.LeakyReLU()
+        self.act_func = nn.Tanh()
         self.dp = nn.Dropout(p=dp)
 
     def forward(self, x):
