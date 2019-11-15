@@ -162,10 +162,10 @@ for i = 1:length(PrPresent)
         else
             % Only 1 labeller
             Data_PrTrLbr = struct2table(ExpData(loc2));
-            Conf = Data_PrTrLbr.Conf;
+%             Conf = Data_PrTrLbr.Conf;
             datamat = table2array(Data_PrTrLbr);
             [TrainData_PrTrLbr, Targets_PrTrLbr, Chunks_PrTrLbr, W_PrTrLbr] = ...
-                genSeqSeries(datamat, Conf);
+                genSeqSeries(datamat, ones(size(datamat, 1), 1));
 
             TrainData(o, 1) = {TrainData_PrTrLbr};
             Targets(o, 1) = {Targets_PrTrLbr};

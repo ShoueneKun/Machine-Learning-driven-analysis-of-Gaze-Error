@@ -31,6 +31,7 @@ class EarlyStopping:
         self.counter = 0
         self.best_score = None
         self.early_stop = False
+        self.update_flag = False
         if mode is 'min':
             self.val_loss_min = np.Inf
         elif mode is 'max':
@@ -50,11 +51,13 @@ class EarlyStopping:
             self.best_score = score
             best_model = self.save_checkpoint(eps, val_loss, model, best_model)
         elif score < self.best_score - self.delta:
+            self.update_flag = False
             self.counter += 1
             print('EarlyStopping counter: {} out of {}'.format(self.counter, self.patience))
             if self.counter >= self.patience:
                 self.early_stop = True
         else:
+            self.update_flag = True
             self.best_score = score
             best_model = self.save_checkpoint(eps, val_loss, model, best_model)
             self.counter = 0
