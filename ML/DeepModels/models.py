@@ -59,7 +59,7 @@ class model_2(torch.nn.Module):
                                       bidirectional=True,
                                       dropout=self.dp_prec)
         self.fc = torch.nn.Linear(24*2, 3)
-        self.dp = torch.nn.dropout(p=self.dp_prec)
+        self.dp = torch.nn.Dropout(p=self.dp_prec)
 
     def forward(self, x, target, weight):
         assert not (torch.isnan(x).any() or torch.isinf(x).any()), "NaN or Inf found in input"
