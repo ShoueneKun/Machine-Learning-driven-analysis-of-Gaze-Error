@@ -10,7 +10,7 @@ spack load py-scikit-learn@0.21 # Load sklearn for metrics
 spack load py-tensorboardx
 
 model_num="1"
-baseJobName="GIW"
+baseJobName="GIW_${model_num}"
 
 echo "Submitting jobs ..."
 declare -a PrTest=("1" "2" "3" "8" "9" "12" "16" "17" "22")
