@@ -75,6 +75,14 @@ def loss_giw(ip, target, weight, ignore_index):
     loss = loss1 + loss2
     return loss, loss1.detach().cpu().item(), loss2.detach().cpu().item()
 
+def loss_giw_dual(ip, target, weight, ignore_index, task_2):
+    loss1 = torch.mean(loss_ce(ip[:,:3,:], target, weight, ignore_index))
+    GD = GeneralizedDiceLoss(ignore_index=ignore_index).cuda()
+    loss2 = GD(ip[:,:3,:], target)
+    loss3 = torch.nn.MSELoss()
+    loss = loss1 + loss2 + loss3(ip[:,3:,:], task_2)
+    return loss, loss1.detach().cpu().item(), loss2.detach().cpu().item()
+
 def loss_ce(ip, target, weight, ignore_index):
     # Computes the loss based on given input and target.
     # Input: batch, sequence, features

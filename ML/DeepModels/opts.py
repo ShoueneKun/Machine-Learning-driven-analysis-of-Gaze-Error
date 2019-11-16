@@ -4,8 +4,7 @@ from loss import getPerformance
 from torchtools import EarlyStopping
 
 def train(net, trainloader, validloader, testloader, TBwriter, args):
-    cond = EarlyStopping(patience=75, mode='max', delta=1e-2)
-    best_model = dict()
+    cond = EarlyStopping(patience=75, mode='max', delta=7.5e-3, verbose=True)
     optimizer = torch.optim.Adam(net.parameters(), lr=args.lr, weight_decay=0)
 
     validTrack = trackPerf()
@@ -43,9 +42,8 @@ def train(net, trainloader, validloader, testloader, TBwriter, args):
                 validTrack.addEntry(eps, bt, perf)
 
         # Record best model
-        best_model = cond(eps, validTrack.getPerf(eps, 'kappa'),
-             net.state_dict() if torch.cuda.device_count() == 1 else net.module.state_dict(),
-             best_model)
+        cond(eps, validTrack.getPerf(eps, 'kappa'),
+             net.state_dict() if torch.cuda.device_count() == 1 else net.module.state_dict())
 
         print('eps: {}. k: {}. p: {}. r: {}. k_evt: {}'.format(
                 eps,
@@ -53,6 +51,7 @@ def train(net, trainloader, validloader, testloader, TBwriter, args):
                 validTrack.getPerf(eps, 'prec'),
                 validTrack.getPerf(eps, 'recall'),
                 validTrack.getPerf(eps, 'kappa_evt')))
+
         # Calculate test performance
         _, perf_test = test(net, testloader, args, cond.update_flag)
 
@@ -62,7 +61,7 @@ def train(net, trainloader, validloader, testloader, TBwriter, args):
             break
 
     TBwriter.close()
-    return validTrack, best_model
+    return validTrack, cond.best_model
 
 def update_tensorboard(TBwriter, trainTrack, validTrack, testTrack, eps):
     TBwriter.add_scalars('loss', {'train': trainTrack.getPerf(eps, 'loss'),

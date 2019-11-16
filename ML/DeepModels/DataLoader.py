@@ -17,7 +17,7 @@ def splitdata(chunk, PrTest, folds):
     freq = np.stack(chunk['freq'], axis=0)
     stratInd = freq[:, 1] > 0.0 # If pursuit is present, flag is 1
     train_loc = np.where(ID[:, 0] != PrTest)[0]
-    skf = StratifiedKFold(n_splits=folds)
+    skf = StratifiedKFold(n_splits=folds, shuffle=True)
     trainIdx = []
     validIdx = []
     for train_index, valid_index in skf.split(train_loc, stratInd[train_loc]):

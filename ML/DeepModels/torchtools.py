@@ -5,6 +5,7 @@ Created on Fri Nov  8 15:46:57 2019
 
 @author: rakshit
 """
+import torch
 import numpy as np
 
 class EarlyStopping:
@@ -32,6 +33,8 @@ class EarlyStopping:
         self.best_score = None
         self.early_stop = False
         self.update_flag = False
+        self.best_model = dict()
+
         if mode is 'min':
             self.val_loss_min = np.Inf
         elif mode is 'max':
@@ -41,7 +44,7 @@ class EarlyStopping:
         self.delta = delta
         self.mode = mode
 
-    def __call__(self,eps, val_loss, model, best_model):
+    def __call__(self,eps, val_loss, model):
         if self.mode == 'min':
             score = -val_loss
         else:
@@ -49,7 +52,8 @@ class EarlyStopping:
 
         if self.best_score is None:
             self.best_score = score
-            best_model = self.save_checkpoint(eps, val_loss, model, best_model)
+            self.save_checkpoint(eps, val_loss, model)
+
         elif score < self.best_score + self.delta:
             self.update_flag = False
             self.counter += 1
@@ -59,18 +63,24 @@ class EarlyStopping:
         else:
             self.update_flag = True
             self.best_score = score
-            best_model = self.save_checkpoint(eps, val_loss, model, best_model)
+            self.save_checkpoint(eps, val_loss, model)
+            self.val_loss_min = score.item()
             self.counter = 0
-        return best_model
 
-    def save_checkpoint(self, eps, val_loss, model_dict, best_model):
+    def save_checkpoint(self, eps, val_loss, model_dict):
         '''Saves model when validation loss decrease.'''
         if self.verbose and self.mode is 'min':
-            print('Validation metric decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(self.val_loss_min, val_loss))
+            print('Validation metric decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(self.val_loss_min, val_loss.item()))
         elif self.verbose and self.mode is 'max':
-            print('Validation metric increased ({:.6f} --> {:.6f}).  Saving model ...'.format(self.val_loss_min, val_loss))
+            print('Validation metric increased ({:.6f} --> {:.6f}).  Saving model ...'.format(self.val_loss_min, val_loss.item()))
+        self.best_model['net_params'] = model_dict
+        self.best_model['eps'] = eps
+        self.best_model['metric'] = val_loss
 
-        best_model['net_params'] = model_dict
-        best_model['eps'] = eps
-        best_model['metric'] = val_loss
-        return best_model
+def verify_weights(best_model_dict, net_dict):
+    for key in net_dict.keys():
+        val = torch.sum(net_dict[key] - best_model_dict[key])
+        if val != 0:
+            print('WTF! Values do not match')
+        else:
+            print('Match')
