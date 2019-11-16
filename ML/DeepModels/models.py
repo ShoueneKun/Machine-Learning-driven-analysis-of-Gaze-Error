@@ -176,3 +176,67 @@ class model_5(torch.nn.Module):
         x = self.fc(x) + 0.00001 # Adding a small eps paramter
         loss, loss1, loss2 = loss_giw(x.permute(0, 2, 1), target, weight, -1)
         return x, loss, loss1, loss2
+
+class model_6(torch.nn.Module):
+    # Bi-directional linear LSTM for GIW paper - Only GiW velocity
+    def __init__(self):
+        super(model_5, self).__init__()
+        self.num_layers = 3
+        self.dp = torch.nn.Dropout(p=0.15)
+        self.linear_stack= linStack(self.num_layers, in_dim=3, hidden_dim=24*3, out_dim=24, dp=0.0)
+        self.RNN_stack = torch.nn.GRU(input_size=24,
+                                      hidden_size=24,
+                                      num_layers=self.num_layers,
+                                      batch_first=True,
+                                      bidirectional=True,
+                                      dropout=0.0)
+
+        self.fc = torch.nn.Linear(24*2, 3)
+        self = weights_init(self)
+
+    def forward(self, x, target, weight):
+        assert not (torch.isnan(x).any() or torch.isinf(x).any()), "NaN or Inf found in input"
+        assert not (torch.isnan(target).any() or torch.isinf(target).any()), "NaN or Inf found in target"
+        assert not (torch.isnan(weight).any() or torch.isinf(weight).any()), "NaN or Inf found in weight"
+
+        # All packing and unpacking will be done inside forward
+        x = x[:,:,6:].cuda()/350
+        # The data structure at this point is (batch, sequence, features)
+        x = self.linear_stack(x)
+        x = self.dp(x)
+        x, _ = self.RNN_stack(x)
+        x = self.fc(x) + 0.00001 # Adding a small eps paramter
+        loss, loss1, loss2 = loss_giw(x.permute(0, 2, 1), target, weight, -1)
+        return x, loss, loss1, loss2
+
+class model_7(torch.nn.Module):
+    # Bi-directional linear LSTM for GIW paper - dropout experiments
+    def __init__(self):
+        super(model_5, self).__init__()
+        self.num_layers = 3
+        self.dp = torch.nn.Dropout(p=0.10)
+        self.linear_stack= linStack(self.num_layers, in_dim=3, hidden_dim=24*3, out_dim=24, dp=0.0)
+        self.RNN_stack = torch.nn.GRU(input_size=24,
+                                      hidden_size=24,
+                                      num_layers=self.num_layers,
+                                      batch_first=True,
+                                      bidirectional=True,
+                                      dropout=0.10)
+
+        self.fc = torch.nn.Linear(24*2, 3)
+        self = weights_init(self)
+
+    def forward(self, x, target, weight):
+        assert not (torch.isnan(x).any() or torch.isinf(x).any()), "NaN or Inf found in input"
+        assert not (torch.isnan(target).any() or torch.isinf(target).any()), "NaN or Inf found in target"
+        assert not (torch.isnan(weight).any() or torch.isinf(weight).any()), "NaN or Inf found in weight"
+
+        # All packing and unpacking will be done inside forward
+        x = x[:,:,6:].cuda()/350
+        # The data structure at this point is (batch, sequence, features)
+        x = self.linear_stack(x)
+        x = self.dp(x)
+        x, _ = self.RNN_stack(x)
+        x = self.fc(x) + 0.00001 # Adding a small eps paramter
+        loss, loss1, loss2 = loss_giw(x.permute(0, 2, 1), target, weight, -1)
+        return x, loss, loss1, loss2
