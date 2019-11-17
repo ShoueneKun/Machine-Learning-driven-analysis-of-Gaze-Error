@@ -14,14 +14,14 @@ class linStack(nn.Module):
         super().__init__()
 
         layers_lin = []
-        layers_norm = []
+        #layers_norm = []
         for i in range(num_layers):
             m = nn.Linear(hidden_dim if i > 0 else in_dim,
                 hidden_dim if i < num_layers - 1 else out_dim)
             layers_lin.append(m)
-            layers_norm.append(nn.BatchNorm1d(hidden_dim if i < num_layers -1 else out_dim, affine=True))
+            #layers_norm.append(nn.BatchNorm1d(hidden_dim if i < num_layers -1 else out_dim, affine=False))
         self.layersLin = nn.ModuleList(layers_lin)
-        self.layersNorm = nn.ModuleList(layers_norm)
+        #self.layersNorm = nn.ModuleList(layers_norm)
         self.act_func = nn.Tanh()
         self.dp = nn.Dropout(p=dp)
 
@@ -31,7 +31,7 @@ class linStack(nn.Module):
             x = self.layersLin[i](x)
             x = x.permute(0, 2, 1) # (batch, features, sequence)
             x = self.act_func(x)
-            x = self.layersNorm[i](x)
+            #x = self.layersNorm[i](x)
             x = x.permute(0, 2, 1) # (batch, sequence, features)
             x = self.dp(x)
         return x

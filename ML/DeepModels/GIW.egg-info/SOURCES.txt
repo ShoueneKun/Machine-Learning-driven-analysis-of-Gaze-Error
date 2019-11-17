@@ -1,0 +1,8 @@
+GIW.egg-info/PKG-INFO
+GIW.egg-info/SOURCES.txt
+GIW.egg-info/dependency_links.txt
+GIW.egg-info/top_level.txt
+elc_metric/ELC.py
+elc_metric/__init__.py
+elc_metric/event_metric.py
+elc_metric/test.py

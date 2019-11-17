@@ -53,7 +53,7 @@ def train(net, trainloader, validloader, testloader, TBwriter, args):
                 validTrack.getPerf(eps, 'kappa_evt')))
 
         # Calculate test performance
-        _, perf_test = test(net, testloader, args, cond.update_flag)
+        perf_test = test(net, testloader, cond.update_flag)[1]
 
         # Update tensorboard
         update_tensorboard(TBwriter, trainTrack, validTrack, perf_test, eps)
@@ -97,9 +97,10 @@ def update_tensorboard(TBwriter, trainTrack, validTrack, testTrack, eps):
                                    'test': testTrack.getPerf(0, 'iou_class')[2]}, eps)
     return []
 
-def test(net, testloader, args, talk=False):
+def test(net, testloader, talk=False):
     testTrack = trackPerf()
     net.eval()
+    Y = []
     with torch.no_grad():
         for seqIdx, data in enumerate(testloader):
             test_data, W, target = data
@@ -111,6 +112,7 @@ def test(net, testloader, args, talk=False):
             perf['loss_ce'] = loss_ce
             perf['loss_dl'] = loss_dl
             testTrack.addEntry(0, seqIdx, perf)
+            Y.append(pd)
     if talk:
         print('[UPDATE] eps: {}. k: {}. p: {}. r: {}. k_evt: {}'.format(
                     0,
@@ -118,7 +120,7 @@ def test(net, testloader, args, talk=False):
                     testTrack.getPerf(0, 'prec'),
                     testTrack.getPerf(0, 'recall'),
                     testTrack.getPerf(0, 'kappa_evt')))
-    return net, testTrack
+    return net, testTrack, Y
 
 class trackPerf():
     def __init__(self):
