@@ -65,6 +65,7 @@ for Clx_id = 1:length(D_clx)
             % Now, we must run the classifier.
             %% Predict using model
             ExpData = parseProcessData(ProcessData, LabelData);
+            targets = ExpData.Labels;
             [testData, testTargets, W] = GenerateDataset_RF(struct2array(ExpData), WinSize, WinSize, ExpData.Conf, 0);
             
             if strcmp(classifierType, 'RF')
@@ -117,7 +118,7 @@ for Clx_id = 1:length(D_clx)
             LabelData.WinSize = WinSize;
             
             strPerf = fullfile(pwd, 'outputs', sprintf('PrIdx_%d_TrIdx_%d_Lbr_%d_WinSize_%d.mat', PrTest, TrTest, X_id, WinSize));
-            save(strPerf, 'LabelData', 'PrTest', 'TrTest', 'Lbr', 'classifierType')
+            save(strPerf, 'LabelData', 'PrTest', 'TrTest', 'Lbr', 'classifierType', 'Y', 'targets')
             
             fprintf('Done. Clx: %d, PrIdx: %d, TrIdx: %d, Lbr: %d\n', Clx_id, PrTest, TrTest, LbrIdx)
         end

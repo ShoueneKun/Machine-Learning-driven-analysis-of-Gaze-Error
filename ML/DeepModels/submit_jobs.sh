@@ -13,7 +13,7 @@ model_num="1"
 baseJobName="GIW_${model_num}"
 
 echo "Submitting jobs ..."
-declare -a PrTest=("1" "2" "3" "8" "9" "12" "16" "17" "22")
+declare -a PrTest=("1" "2" "3" "6" "8" "9" "12" "16" "17" "22")
 
 for PrIdx in "${PrTest[@]}"
 do

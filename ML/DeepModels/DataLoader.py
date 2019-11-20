@@ -10,6 +10,7 @@ import pickle
 import numpy as np
 from args import parse_args
 from torch.utils.data import Dataset
+from torchtools import perturbate
 from sklearn.model_selection import StratifiedKFold
 
 def splitdata(chunk, PrTest, folds):
@@ -53,7 +54,8 @@ class GIW_readSeq(Dataset):
         vel = self.data['vel'][idx]
         w = self.data['weights'][idx]
         target = self.data['targets'][idx]
-        return vel, w, target
+        n = int(4*np.floor(w.shape[0]/4))
+        return vel[:n, :], w[:n], target[:n]
 
 if __name__=='__main__':
     args = parse_args()

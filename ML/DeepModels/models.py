@@ -7,7 +7,8 @@ Created on Thu Nov  7 11:57:48 2019
 """
 import torch
 import torch.nn.functional as F
-from ModelHelpers import linStack, weights_init
+import numpy as np
+from ModelHelpers import linStack, weights_init, uBlock, dBlock
 from loss import loss_giw, loss_giw_dual
 
 class model_1(torch.nn.Module):
@@ -22,7 +23,7 @@ class model_1(torch.nn.Module):
                                       num_layers=self.num_layers,
                                       batch_first=True,
                                       bidirectional=True,
-                                      dropout=0.0)
+                                      dropout=0.15)
 
         self.fc = torch.nn.Linear(24*2, 3)
         self = weights_init(self)
@@ -204,7 +205,7 @@ class model_6(torch.nn.Module):
         x = self.bn1(F.leaky_relu(self.d1(x_in)))
         x = self.bn2(F.leaky_relu(self.d2(x)))
         x = self.dp(x)
-        x = torch.cat([self.d3_1(x), self.d3_2(x), self.d3_3(x), self.d3_4(x)], axis=1)
+        x = torch.cat([self.d3_1(x), self.d3_2(x), self.d3_3(x), self.d3_4(x)], dim=1)
         x = self.bn3(F.leaky_relu(x))
         x = torch.cat([x, x_in], dim=1)
         x = x.permute(0, 2, 1)
@@ -278,3 +279,60 @@ class model_8(torch.nn.Module):
         x = self.fc(x) + 0.00001 # Adding a small eps paramter
         loss, loss1, loss2 = loss_giw(x.permute(0, 2, 1), target, weight, -1)
         return x, loss, loss1, loss2
+
+class model_9(torch.nn.Module):
+    # Encoder-decoder arch.
+    def __init__(self):
+        super(model_9, self).__init__()
+        self.dp = 0.10
+
+        self.head = torch.nn.Conv1d(in_channels=6, out_channels=16, kernel_size=3, padding=1, bias=True)
+        self.choke = torch.nn.Conv1d(in_channels=16+6, out_channels=16, kernel_size=1, bias=True)
+
+        self.down_1 = dBlock(16, 16, dp=self.dp)
+        self.down_2 = dBlock(16, 16, dp=self.dp)
+
+        self.rnn_zip = torch.nn.GRU(input_size=16, hidden_size=16, num_layers=1, batch_first=True, bidirectional=True)
+        #self.choke_time = torch.nn.Conv1d(in_channels=16*2, out_channels=16, kernel_size=1, bias=True)
+
+        self.up_2 = uBlock(16, 16)
+        self.up_1 = uBlock(16, 16)
+
+        self.fc = torch.nn.Conv1d(in_channels=16, out_channels=3, kernel_size=1, padding=0, bias=True)
+        self.avgpool = torch.nn.AvgPool1d(kernel_size=2, padding=0, stride=2)
+
+    def forward(self, ip, target, weight):
+        '''
+        N = int(np.floor(ip.shape[1]/4))
+        ip = ip[:,:N*4,:6]
+        target = target[:,:N*4]
+        weight = weight[:,:N*4]
+        '''
+        ip = ip[:,:,:6].cuda().permute(0, 2, 1)/350
+        x = self.head(ip)
+        x = torch.cat([x, ip], dim=1)
+        x = self.choke(x)
+
+        # Down 1
+        d1 = self.avgpool(x)
+        d1 = self.down_1(d1)
+
+        # Down 2
+        d2 = self.avgpool(d1)
+        d2 = self.down_2(d2)
+
+        # Zip
+        u2 = self.rnn_zip(d2.permute(0, 2, 1))[0]
+
+        # Up 2
+        u2 = self.up_2(u2.permute(0, 2, 1))
+        u1 = torch.cat([u2, d1], dim=1)
+
+        # Up 1
+        u1 = self.up_1(u1)
+
+        #Output
+        op = self.fc(u1)
+        loss, loss1, loss2 = loss_giw(op, target, weight, -1)
+        return op.permute(0,2,1), loss, loss1, loss2
+

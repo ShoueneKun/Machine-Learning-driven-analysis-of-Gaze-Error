@@ -93,53 +93,63 @@ class dBlock(nn.Module):
         self.c1 = nn.Conv1d(in_channels=in_c,
                             out_channels=out_c,
                             kernel_size=3,
-                            stride=2,
+                            stride=1,
                             padding=1,
                             dilation=1,
                             bias=True)
-        self.c2 = nn.Conv1d(in_channels=in_c,
+        self.c2 = nn.Conv1d(in_channels=out_c+in_c,
                             out_channels=out_c,
                             kernel_size=3,
-                            stride=2,
-                            padding=3,
-                            dilation=3,
+                            stride=1,
+                            padding=1,
+                            dilation=1,
                             bias=True)
-        self.choke = nn.Conv1d(in_channels=2*out_c,
+        self.choke = nn.Conv1d(in_channels=out_c+in_c,
                                out_channels=out_c,
                                kernel_size=1,
                                stride=1)
+
         self.dp = nn.Dropout(dp)
-    def forward(self, x):
+        self.actfunc = torch.nn.LeakyReLU()
+        self.bn = torch.nn.BatchNorm1d(num_features=out_c)
+
+    def forward(self, ip):
         # The input is of the form [N, C, L]
-        x1 = self.c1(x)
-        x2 = self.c2(x)
-        x = torch.cat([x1, x2], dim=1)
-        x = self.dp(self.choke(x))
-        return (x, [x1, x2])
+        x = torch.cat([self.actfunc(self.c1(ip)), ip], dim=1)
+        x = self.dp(x)
+        x = torch.cat([self.actfunc(self.c2(x)), ip], dim=1)
+        x = self.bn(self.actfunc(self.choke(x)))
+        return x
 
 class uBlock(nn.Module):
     def __init__(self, in_c, out_c):
         super().__init__()
-        self.c1 = nn.ConvTranspose1d(in_channels=in_c,
-                                     out_channels=out_c,
-                                     kernel_size=3,
-                                     stride=2,
-                                     padding=1,
-                                     dilation=1)
-        self.c2 = nn.ConvTranspose1d(in_channels=in_c,
-                                     out_channels=out_c,
-                                     kernel_size=3,
-                                     stride=2,
-                                     padding=3,
-                                     dilation=3)
+        self.c1 = nn.Conv1d(in_channels=in_c+out_c,
+                            out_channels=out_c,
+                            kernel_size=3,
+                            stride=1,
+                            padding=1,
+                            dilation=1,
+                            bias=True)
+        self.c2 = nn.Conv1d(in_channels=out_c,
+                            out_channels=out_c,
+                            kernel_size=3,
+                            stride=1,
+                            padding=1,
+                            dilation=1,
+                            bias=True)
+
+        self.actfunc = torch.nn.LeakyReLU()
+
         self.choke = nn.Conv1d(in_channels=out_c*2,
                                out_channels=out_c,
                                kernel_size=1,
                                stride=1)
-    def forward(self, x, connList):
-        x1 = torch.cat([x, connList[0]], dim=1)
-        x2 = torch.cat([x, connList[1]], dim=1)
-        x1 = self.c1(x1)
-        x2 = self.c2(x2)
+        self.bn = torch.nn.BatchNorm1d(num_features=out_c)
+
+    def forward(self, ip):
+        x = torch.nn.functional.interpolate(ip, scale_factor=2)
+        x1 = self.actfunc(self.c1(x))
+        x2 = self.actfunc(self.c2(x1))
         x = self.choke(torch.cat([x1, x2], dim=1))
-        return x
+        return self.bn(self.actfunc(x))

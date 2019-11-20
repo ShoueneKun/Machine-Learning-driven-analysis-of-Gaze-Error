@@ -21,7 +21,7 @@ ExpData = table2struct(ExpData);
 
 SR = 300;
 
-CombLabels = 1;
+CombLabels = 0;
     
 m = 1;
 for i = 1:length(D_pd)
@@ -29,7 +29,7 @@ for i = 1:length(D_pd)
     data = sscanf(D_pd(i).name, 'PrIdx_%d_TrIdx_%d.mat');
     PrIdx = data(1); TrIdx = data(2);
     
-    if ~ismember(PrIdx, [1, 2, 3, 8, 9, 12, 16, 17, 22])
+    if ~ismember(PrIdx, [1, 2, 3, 6, 8, 9, 12, 16, 17, 22])
         fprintf('Skipping Pr: %d\n', PrIdx)
         continue
     end
@@ -162,10 +162,12 @@ for i = 1:length(PrPresent)
         else
             % Only 1 labeller
             Data_PrTrLbr = struct2table(ExpData(loc2));
-%             Conf = Data_PrTrLbr.Conf;
+            Conf = Data_PrTrLbr.Conf;
             datamat = table2array(Data_PrTrLbr);
+%             [TrainData_PrTrLbr, Targets_PrTrLbr, Chunks_PrTrLbr, W_PrTrLbr] = ...
+%                 genSeqSeries(datamat, ones(size(datamat, 1), 1));
             [TrainData_PrTrLbr, Targets_PrTrLbr, Chunks_PrTrLbr, W_PrTrLbr] = ...
-                genSeqSeries(datamat, ones(size(datamat, 1), 1));
+                genSeqSeries(datamat, Conf);
 
             TrainData(o, 1) = {TrainData_PrTrLbr};
             Targets(o, 1) = {Targets_PrTrLbr};

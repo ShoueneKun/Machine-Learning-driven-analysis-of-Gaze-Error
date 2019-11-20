@@ -15,15 +15,22 @@ associated with a certain condition.
 import os
 import torch
 import pickle
+import numpy as np
 import scipy.io as scio
 from DeepModels.opts import test
 from DeepModels.models import *
 from DeepModels.DataLoader import GIW_readSeq
 
+'''
+WARNING
+This is a slow process
+'''
+
 if __name__=='__main__':
     path2weights = '/home/rakshit/sporc/gaze-in-wild/ML/DeepModels/weights'
     f = open(os.path.join(os.path.join(os.getcwd(), 'DeepModels', 'Data'), 'Data.pkl'), 'rb')
     seq = pickle.load(f)[1]
+    ID_info = np.stack(seq['id'], axis=0)
 
     PrList = [1, 2, 3, 8, 9, 12, 16, 17, 22]
     ModelPresent = list(range(0, 7))
@@ -36,23 +43,29 @@ if __name__=='__main__':
                                              num_workers=1,
                                              shuffle=False)
         for model_num in ModelPresent:
+            print('eval model: {}'.format(model_num+1))
             model = eval('model_{}'.format(model_num+1))
             net = model().cuda().to(torch.float32)
             for fold in range(0,5):
+                print('fold: {}'.format(fold))
                 path2weight = os.path.join(path2weights, 'PrTest_{}_model_{}_fold_{}.pt'.format(PrIdx, model_num+1, fold))
                 if os.path.exists(path2weight):
-                    net.load_state_dict(torch.load(path2weight)['net_params'])
+                    try:
+                        net.load_state_dict(torch.load(path2weight)['net_params'])
+                    except:
+                        print('Dict mismatch. Training not complete yet.')
+                        continue
                     Y = test(net, testloader, talk=True)[2]
                     assert len(Y) == testObj.idx.shape[0], "Something went wrong"
 
                     for i, y in enumerate(Y):
-                        TrIdx = testObj.idx[i, 1] # TrIdx
+                        TrIdx = ID_info[testObj.idx[i], 1] # TrIdx
                         fsave = os.path.join(os.getcwd(),
                                              'outputs',
-                                             'PrIdx_{}_TrIdx_{}_Lbr_{}_WinSize_0'.format(PrIdx, TrIdx, ModelID[model_num]))
-                        scio.savemat({'Labels': y.reshape(-1, 1),
+                                             'PrIdx_{}_TrIdx_{}_Lbr_{}_fold_0.mat'.format(PrIdx, int(TrIdx), ModelID[model_num]))
+                        scio.savemat(fsave, {'Labels': y.reshape(-1, 1),
                                       'PrIdx': PrIdx,
-                                      'TrIdx': TrIdx}, appendmat=True)
+                                      'TrIdx': TrIdx})
                 else:
                     print('Weights for this model does not exist')
 
