@@ -9,7 +9,6 @@ import os
 import copy
 import torch
 import numpy as np
-import quaternion as qt
 
 class EarlyStopping:
     """Early stops the training if validation loss doesn't improve after a given patience."""
@@ -90,58 +89,3 @@ def verify_weights(best_model_dict, net_dict):
             print('WTF! Values do not match')
         else:
             print('Match')
-
-def noiseAdd(x):
-    # Input is a Nx3 or Nx6 matrix. Each row represents an eye or eye+head
-    # velocity vector. This function calculates the RMS value of each channel
-    # and adds AWGN between [0, 0.2]. Each column is treated as an
-    # independant signal source. Hence, they'll have different noise levels.
-    SgnShape = x.shape
-    for i in range(0, SgnShape[1]):
-        RMS = torch.pow(torch.mean(torch.pow(x[:, i], 2)), 0.5)
-        NoiseRMS = np.random.rand(1)*0.2*RMS.numpy() # Noise should be upto 0.2 RMS
-        NoiseSgn = np.random.normal(0, NoiseRMS**0.5, size=(SgnShape[0], ))
-        x[:, i] = x[:, i] + torch.from_numpy(NoiseSgn).type(x.type())
-    return x
-
-def perturbate(ip, mode=1):
-    # Input is a list of L data, wherein each entry needs to be perturbed by a
-    # random Az rotation or additive noise across all 3 axis.
-    if mode is 1:
-        M = list(map(rotator, ip))
-    elif mode is 2:
-        M = list(map(noiseAdd, ip))
-    else:
-        # No perturbation
-        M = ip
-    return M
-
-def rotateVector(vec, rotMat=None):
-    if rotMat is not None:
-        R = rotMat
-    else:
-        # Returns a 4x4 matrix. Take the first 3.
-        # R = random_rotation_matrix()[:3, :3]
-        R = rotation_matrix((2*np.random.rand()-1.0)*np.pi, [0, 1, 0])[:3, :3]
-    if vec.shape[1] == 3:
-        return R, np.matmul(vec, R)
-    elif vec.shape[1] == 4:
-        # Input is a quaternion. Be careful.
-        # Prefer to keep using Quaternion as
-        # it is blazingly fast.
-        Q = qt.as_quat_array(vec)
-        Qmov = qt.from_rotation_matrix(R)
-        Q_out = Qmov.conj()*Q*Qmov
-        return R, qt.as_float_array(Q_out)
-    else:
-        print('Incorrect shape')
-
-def rotator(x):
-    # Input is a Nx3, Nx6 or Nx7 matrix. Each row represents an eye or eye+head
-    # vector which needs to be rotated by the same rotation matrix. Head can
-    # also be a quaternion to describe pose.
-    R, A = rotateVector(x[:, :3].numpy(), None)
-    A = torch.from_numpy(A).type(x.type())
-    _, B = rotateVector(x[:, 3:].numpy(), R)
-    B = torch.from_numpy(B).type(x.type())
-    return torch.cat((A, B), dim=1)
