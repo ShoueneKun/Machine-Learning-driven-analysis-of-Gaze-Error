@@ -145,9 +145,9 @@ for i = 1:length(PrPresent)
                 o = o + 1;
             else
                 LabelMat = cell2mat(Data_PrTrLbr.Labels');
-                sc_freq = LabelMat ~= 0 & LabelMat ~=4; % All locations where a valid label is present
+                sc_freq = LabelMat ~= 0 & LabelMat ~=5; % All locations where a valid is present
                 sc_freq = sum(sc_freq, 2);
-                weight_scale = 1./sc_freq; weight_scale(isinf(weight_scale)) = 1;
+                weight_scale = 1./sc_freq; weight_scale(isinf(weight))
                 
                 for g = 1:size(Data_PrTrLbr, 1) % Loop through available labellers
                     datamat = cell2mat(table2array(Data_PrTrLbr(g, :)));

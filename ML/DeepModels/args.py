@@ -13,7 +13,7 @@ import os
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--PrTest', type=int, default=1)
-    parser.add_argument('--lr', type=float, default=1e-4)
+    parser.add_argument('--lr', type=float, default=5e-4)
     parser.add_argument('--batchsize', type=int, default=32)
     parser.add_argument('--modeltype', type=int, default=8)
     parser.add_argument('--epochs', type=int, default=200)

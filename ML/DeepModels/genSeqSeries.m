@@ -34,11 +34,11 @@ Len(loc) = []; StartEnd_idx(loc, :) = [];
 % Correct Targets
 labels = convertLabels(labels(:));
 labels_mod = labels;
-labels_mod(W_ip < 0.2) = -1;
+% labels_mod(W_ip < 0.2) = -1;
 
 % For samples not to be included, replace weight with 0.01 for numerical
 % stability
-W_ip(W_ip < 0.2) = 0.01;
+% W_ip(W_ip < 0.2) = 0.01;
 
 % Find all sequences which atleast 20 continuous samples in it
 loc = find(Len >= 20);
@@ -51,8 +51,8 @@ for i = 1:numSequences
     if ~prod(labels_mod(x:y) == -1)
         dataBoo = ExpData(x:y, featSpace_vec);
         dataBoo_vel = ExpData(x:y, featSpace_vel);
-        if any(abs(dataBoo(:)) > 1 ) || any(isnan(dataBoo(:))) || all(dataBoo(:) == 0) ||  all(W_ip(x:y) <= 0.1)
-            keyboard
+        if any(abs(dataBoo(:)) > 1 ) || any(isnan(dataBoo(:))) || all(dataBoo(:) == 0)
+            lskeyboard
         end
         % Append data to make sure that L + 3 is divisible by 4         
         temp = [dataBoo, dataBoo_vel, W_ip(x:y), labels_mod(x:y)];
