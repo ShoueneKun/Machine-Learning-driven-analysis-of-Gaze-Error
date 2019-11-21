@@ -177,9 +177,9 @@ class model_6(torch.nn.Module):
         super(model_6, self).__init__()
         self.dp_prec = 0.1
         self.d1 = torch.nn.Conv1d(in_channels=6, out_channels=16, kernel_size=3, padding=1)
-        self.bn1 = torch.nn.BatchNorm1d(num_features=16)
+        self.bn1 = torch.nn.BatchNorm1d(num_features=16, affine=True)
         self.d2 = torch.nn.Conv1d(in_channels=16, out_channels=16, kernel_size=3, padding=1)
-        self.bn2 = torch.nn.BatchNorm1d(num_features=16)
+        self.bn2 = torch.nn.BatchNorm1d(num_features=16, affine=True)
         self.d3_1 = torch.nn.Conv1d(in_channels=16, out_channels=4, kernel_size=3, padding=1, dilation=1)
         self.d3_2 = torch.nn.Conv1d(in_channels=16, out_channels=4, kernel_size=3, padding=2, dilation=2)
         self.d3_3 = torch.nn.Conv1d(in_channels=16, out_channels=4, kernel_size=3, padding=3, dilation=3)
