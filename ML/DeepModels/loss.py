@@ -89,7 +89,7 @@ def loss_ce(ip, target, weight, ignore_index):
     # Target: batch, sequence, class
     #cE = torch.nn.CrossEntropyLoss(reduction='none', ignore_index=-1)
     #loss_ce = cE(ip, target.to(torch.long))
-    cE = torch.nn.CrossEntropyLoss(reduction='none', ignore_index=-1)
+    cE = torch.nn.CrossEntropyLoss(reduction='none', ignore_index=-1, weight=torch.tensor([0.3, 0.8, 0.5]).cuda())
     sampleWeight = weight/torch.sum(weight, dim=1, keepdim=True)
     loss_ce = sampleWeight*cE(ip, target.to(torch.long))
 

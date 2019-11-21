@@ -71,8 +71,10 @@ for i = 1:length(D_pd)
             
             ExpData(m).EIH_AzVel = interp1(ProcessData.T, ProcessData.ETG.Az_Vel(:), T, 'spline');
             ExpData(m).EIH_ElVel = interp1(ProcessData.T, ProcessData.ETG.El_Vel(:), T, 'spline');
+            
             ExpData(m).Head_AzVel = interp1(ProcessData.T, ProcessData.IMU.Az_Vel(:), T, 'spline');
             ExpData(m).Head_ElVel = interp1(ProcessData.T, ProcessData.IMU.El_Vel(:), T, 'spline');
+            
             ExpData(m).GIW_AzVel = interp1(ProcessData.T, ProcessData.GIW.Az_Vel(:), T, 'spline');
             ExpData(m).GIW_ElVel = interp1(ProcessData.T, ProcessData.GIW.El_Vel(:), T, 'spline');
             

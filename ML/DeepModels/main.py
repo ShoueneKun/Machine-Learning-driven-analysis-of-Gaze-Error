@@ -101,6 +101,7 @@ if __name__=='__main__':
         print('Best run test kappa: {}'.format(perf_test_run.getPerf(0, 'kappa')))
 
         if perf_test_run.getPerf(0, 'kappa') > perf_test_saved.getPerf(0, 'kappa'):
+            print('Difference observed. Update the best model.')
             torch.save(best_model, args.path2save)
         else:
             print('Best model already saved.')

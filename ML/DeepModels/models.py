@@ -54,10 +54,10 @@ class model_2(torch.nn.Module):
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
-                                      bidirectional=False,
+                                      bidirectional=True,
                                       dropout=0.0)
 
-        self.fc = torch.nn.Linear(24, 3)
+        self.fc = torch.nn.Linear(24*2, 3)
         self = weights_init(self)
 
     def forward(self, x, target, weight):
@@ -66,7 +66,7 @@ class model_2(torch.nn.Module):
         assert not (torch.isnan(weight).any() or torch.isinf(weight).any()), "NaN or Inf found in weight"
 
         # All packing and unpacking will be done inside forward
-        x = x[:,:,:3].cuda()/350
+        x = x[:,:,:3].cuda()
         # The data structure at this point is (batch, sequence, features)
         x = self.linear_stack(x)
         x = self.dp(x)
@@ -86,10 +86,10 @@ class model_3(torch.nn.Module):
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
-                                      bidirectional=False,
+                                      bidirectional=True,
                                       dropout=0.0)
 
-        self.fc = torch.nn.Linear(24, 3)
+        self.fc = torch.nn.Linear(24*2, 3)
         self = weights_init(self)
 
     def forward(self, x, target, weight):
@@ -98,7 +98,7 @@ class model_3(torch.nn.Module):
         assert not (torch.isnan(weight).any() or torch.isinf(weight).any()), "NaN or Inf found in weight"
 
         # All packing and unpacking will be done inside forward
-        x = x[:,:,[0, 3]].cuda()/350
+        x = x[:,:,[0, 3]].cuda()
         # The data structure at this point is (batch, sequence, features)
         x = self.linear_stack(x)
         x = self.dp(x)
