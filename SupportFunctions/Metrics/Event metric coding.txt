@@ -1,0 +1,40 @@
+give  information about the person and trial
+ask user to type in the indices for person and trial
+if (>1 labeler's data)
+	store each label data as a variable
+	calculate one-vs-all (choose one labeler's data as reference) scores and differences
+	draw a figure that shows difference of the test labelers to the reference labeler
+	report the scores
+	repeat the calculation step for the rest uncalculated pairs
+	report aggregated scores
+
+
+Improvements:
+The relative timing offsets of one labeler labeling events to another labeler labeleling the same event should reflet some systematic different thresholds or roles labelers tend to use. After the confusion matrix on the event level, each type of disagreement can have a weight for seriousness
+
+
+doug crawford
+
+Kruskal–Wallis one-way analysis of variance
+Level of measurement
+
+
+Procedure:
+0. make sure the label sequences are at the same sampling rate
+1. clean the labels (fill gaps)
+
+debug the 1-length differencing results
+
+make sure calculate the L2 distance and overlap ratio on the events that matched both at the start and end points
+calculate the number for correctly classified events in each class
+overlap ratio should be reported for each class?
+
+
+
+
+
+
+
+
+
+new data struct does not have Labels(sequence) but only struct.

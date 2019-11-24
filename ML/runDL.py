@@ -17,6 +17,7 @@ import torch
 import pickle
 import numpy as np
 import scipy.io as scio
+from DeepModels.args import parse_args
 from DeepModels.opts import test
 from DeepModels.models import *
 from DeepModels.DataLoader import GIW_readSeq
@@ -27,6 +28,8 @@ This is a slow process
 '''
 
 if __name__=='__main__':
+    args = parse_args()
+    args.prec = torch.float64
     path2weights = '/home/rakshit/sporc/gaze-in-wild/ML/DeepModels/weights'
     f = open(os.path.join(os.path.join(os.getcwd(), 'DeepModels', 'Data'), 'Data.pkl'), 'rb')
     seq = pickle.load(f)[1]
@@ -45,28 +48,32 @@ if __name__=='__main__':
         for model_num in ModelPresent:
             print('eval model: {}'.format(model_num+1))
             model = eval('model_{}'.format(model_num+1))
-            net = model().cuda().to(torch.float32)
-            for fold in range(0,5):
+            net = model().cuda().to(args.prec)
+            best = 0
+            for fold in range(0, args.folds):
                 print('fold: {}'.format(fold))
-                path2weight = os.path.join(path2weights, 'PrTest_{}_model_{}_fold_{}.pt'.format(PrIdx, model_num+1, fold))
+                path2weight = os.path.join(path2weights, 'PrTest_{}_model_{}_fold_{}.pt'.format(int(PrIdx), int(model_num+1), fold))
                 if os.path.exists(path2weight):
                     try:
                         net.load_state_dict(torch.load(path2weight)['net_params'])
                     except:
                         print('Dict mismatch. Training not complete yet.')
                         continue
-                    _, _, Y, id_trIdx = test(net, testloader, talk=True)[2]
+                    _, perf_test, Y, id_trIdx = test(net, testloader, talk=True)
                     assert len(Y) == testObj.idx.shape[0], "Something went wrong"
-
-                    for i, y in enumerate(Y):
-                        PrIdx = id_trIdx[i, 0]
-                        TrIdx = id_trIdx[i, 1]
-                        fsave = os.path.join(os.getcwd(),
-                                             'outputs',
-                                             'PrIdx_{}_TrIdx_{}_Lbr_{}_fold_0.mat'.format(PrIdx, int(TrIdx), ModelID[model_num]))
-                        scio.savemat(fsave, {'Labels': y.reshape(-1, 1),
-                                      'PrIdx': PrIdx,
-                                      'TrIdx': TrIdx})
+                    if perf_test.getPerf(0, 'kappa') > best:
+                        best = perf_test.getPerf(0,0,'kappa')
+                        for i, y in enumerate(Y):
+                            TrIdx = id_trIdx[i, 1]
+                            fsave = os.path.join(os.getcwd(),
+                                                 'outputs_kfold',
+                                                 'PrIdx_{}_TrIdx_{}_Lbr_{}_WinSize_0.mat'.format(PrIdx, int(TrIdx), ModelID[model_num]))
+                            scio.savemat(fsave, {'Y': y.reshape(-1, 1),
+                                          'PrIdx': PrIdx,
+                                          'TrIdx': TrIdx,
+                                          'Lbr': ModelID[model_num]})
+                    else:
+                        print('Best fold found. Ignoring fold: {}'.format(fold))
                 else:
                     print('Weights for this model does not exist')
 

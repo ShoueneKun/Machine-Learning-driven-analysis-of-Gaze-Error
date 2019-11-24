@@ -12,7 +12,7 @@ spack load py-scikit-image ^python@3 # Load image manipulation library
 spack load py-scikit-learn@0.21 # Load sklearn for metrics
 spack load py-tensorboardx
 
-declare -a model_list=("1" "2" "3" "4" "5" "6" "7" "8" "9")
+declare -a model_list=("1" "2" "3" "4" "5" "8" "9")
 
 for model_num in "${model_list[@]}"
 do
@@ -25,6 +25,6 @@ do
     do
         echo "Submitting $PrIdx"
         echo -e "#!/bin/bash \n python3 main_notest.py --PrTest=${PrIdx} --lr=1e-4 --modeltype=${model_num} --batchsize=64 --epochs=175" > command.lock
-        sbatch -J ${baseJobName} --output="rc_log_notest/${PrIdx}_${model_num}.o" --error="rc_log_notest/${PrIdx}_${model_num}.e" --mem=16G -n 1 -t 1-2:0:0 -p tier3 -A riteyes --gres=gpu:1 --mail-user=rsk3900@rit.edu --mail-type=ALL command.lock
+        sbatch -J ${baseJobName} --output="rc_log_notest/${PrIdx}_${model_num}.o" --error="rc_log_notest/${PrIdx}_${model_num}.e" --mem=16G -n 1 -t 0-10:0:0 -p tier3 -A riteyes --gres=gpu:1 --mail-user=rsk3900@rit.edu --mail-type=ALL command.lock
     done
 done

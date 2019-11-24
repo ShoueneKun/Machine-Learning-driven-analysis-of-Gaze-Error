@@ -12,7 +12,8 @@ spack load py-scikit-image ^python@3 # Load image manipulation library
 spack load py-scikit-learn@0.21 # Load sklearn for metrics
 spack load py-tensorboardx
 
-declare -a model_list=("1" "2" "3" "4" "5" "6" "7" "8" "9")
+# declare -a model_list=("1" "2" "3" "4" "5" "6" "7" "8" "9")
+declare -a model_list=("1" "2" "3" "4" "5" "8" "9")
 
 for model_num in "${model_list[@]}"
 do

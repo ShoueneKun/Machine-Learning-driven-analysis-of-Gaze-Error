@@ -195,7 +195,7 @@ def test(net, testloader, args, talk=False):
             gDL.append(loss_dl)
             Y.append(pd.reshape(-1))
             GT.append(gt.reshape(-1))
-            ID.append(id_trx.numpy())
+            ID.append(id_trx.numpy().reshape(-1))
         perf = getPerformance(np.hstack(GT), np.hstack(Y), calc_evt=False)
         perf['loss'] = np.mean(L)
         perf['loss_ce'] = np.mean(ceL)
@@ -208,7 +208,7 @@ def test(net, testloader, args, talk=False):
                     testTrack.getPerf(0, 'prec'),
                     testTrack.getPerf(0, 'recall'),
                     testTrack.getPerf(0, 'kappa_evt')))
-    return net, testTrack, Y, ID
+    return net, testTrack, Y, np.stack(ID, axis=0)
 
 class trackPerf():
     def __init__(self):

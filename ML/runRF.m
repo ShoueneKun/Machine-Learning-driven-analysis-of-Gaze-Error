@@ -117,7 +117,9 @@ for Clx_id = 1:length(D_clx)
             LabelData.LbrIdx = X_id;
             LabelData.WinSize = WinSize;
             
-            strPerf = fullfile(pwd, 'outputs', sprintf('PrIdx_%d_TrIdx_%d_Lbr_%d_WinSize_%d.mat', PrTest, TrTest, X_id, WinSize));
+            strPerf = fullfile(pwd, 'outputs_notest', sprintf('PrIdx_%d_TrIdx_%d_Lbr_%d_WinSize_%d.mat', PrTest, TrTest, X_id, WinSize));
+            save(strPerf, 'LabelData', 'PrTest', 'TrTest', 'Lbr', 'classifierType', 'Y', 'targets')
+            strPerf = fullfile(pwd, 'outputs_kfold', sprintf('PrIdx_%d_TrIdx_%d_Lbr_%d_WinSize_%d.mat', PrTest, TrTest, X_id, WinSize));
             save(strPerf, 'LabelData', 'PrTest', 'TrTest', 'Lbr', 'classifierType', 'Y', 'targets')
             
             fprintf('Done. Clx: %d, PrIdx: %d, TrIdx: %d, Lbr: %d\n', Clx_id, PrTest, TrTest, LbrIdx)

@@ -3,11 +3,9 @@ close all
 clc
 
 %% Relevant paths
-addpath(fullfile(pwd, 'matlab_support'))
-
 Path2Repo = '/home/rakshit/Documents/MATLAB/gaze-in-wild';
-addpath(Path2Repo)
-txt = fscanf(fopen('path.json', 'rb'), '%s');
+addpath(genpath(fullfile(Path2Repo, 'SupportFunctions')))
+txt = fscanf(fopen(fullfile(Path2Repo, 'path.json'), 'rb'), '%s');
 path_struct = jsondecode(txt);
 
 global Path2ProcessData Path2LabelData
@@ -19,7 +17,7 @@ ParticipantInfo = GetParticipantInfo();
 loc = cellfun(@isempty, {ParticipantInfo.Name});
 ParticipantInfo(loc) = [];
 PrPresent = 1:length(ParticipantInfo);
-loc = ismember({ParticipantInfo.Name}, {'Asher', 'Brendan'});
+loc = ismember({ParticipantInfo.Name}, {'7'});
 ParticipantInfo(loc) = [];
 PrPresent(loc) = [];
 
@@ -157,6 +155,7 @@ Classifier_EvtResults = cell2table(Classifier_EvtResults);
 Classifier_EvtResults.Properties.VariableNames={'ref_LbrIdx', 'test_LbrIdx', 'WinSize', 'EER', 'fixF1', 'purF1', ...
     'sacF1', 'l2', 'olr', 'conf_mat', 'kappa', 'kappa_class', 'nm_events', ...
     'l2_b', 'olr_b', 'conf_mat_b', 'kappa_b', 'kappa_class_b', 'nm_events_b', 'DomSamp'};
+
 % Classifier_SampleResults -> [PrIdx, Clx_id, WinSize]
 
 %% Quick stats

@@ -60,15 +60,6 @@ ParticipantInfo(3).Start_s(2) = 44;
 ParticipantInfo(3).useTimingInfo(2) = 0;
 
 %% 
-% ParticipantInfo(4).Name = 'Meet';
-% ParticipantInfo(4).Trials = [1, ];
-% ParticipantInfo(4).OldStyle = 0;
-% ParticipantInfo(4).RealDepthPresent = 0;
-% 
-% ParticipantInfo(4).Start_h(1) = 20; 
-% ParticipantInfo(4).Start_m(1) = 17;
-% ParticipantInfo(4).Start_s(1) = 42.898;
-%%
 ParticipantInfo(4).Name = '4';
 ParticipantInfo(4).Trials = [1, 3];
 ParticipantInfo(4).OldStyle = 0;
