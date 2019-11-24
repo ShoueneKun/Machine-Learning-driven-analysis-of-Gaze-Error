@@ -247,7 +247,7 @@ class model_7(torch.nn.Module):
         x, _ = self.RNN_stack(x)
         x = self.fc(x) + 0.00001 # Adding a small eps paramter
         loss, loss1, loss2 = loss_giw_dual(x.permute(0, 2, 1), target, weight, -1, giw_vel.permute(0,2,1))
-        return x, loss, loss1, loss2
+        return x[:,:,:3], loss, loss1, loss2
 
 class model_8(torch.nn.Module):
     # Bi-directional linear LSTM for GIW paper - dropout experiments

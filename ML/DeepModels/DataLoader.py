@@ -43,7 +43,7 @@ def splitdata(chunk, PrTest, folds):
 
         trainIdx = []
         validIdx = []
-        kf = KFold(shuffle=True, n_split=folds)
+        kf = KFold(shuffle=True, n_splits=folds)
         for train_index, valid_index in kf.split(loc_toSplit):
             temp = np.append(loc_toSplit[train_index], loc_Pur)
             trainIdx.append(temp)
