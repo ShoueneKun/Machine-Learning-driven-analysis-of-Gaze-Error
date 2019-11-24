@@ -46,29 +46,30 @@ if __name__=='__main__':
             print('eval model: {}'.format(model_num+1))
             model = eval('model_{}'.format(model_num+1))
             net = model().cuda().to(torch.float32)
-            for fold in range(0,5):
-                print('fold: {}'.format(fold))
-                path2weight = os.path.join(path2weights, 'PrTest_{}_model_{}_fold_{}.pt'.format(PrIdx, model_num+1, fold))
-                if os.path.exists(path2weight):
-                    try:
-                        net.load_state_dict(torch.load(path2weight)['net_params'])
-                    except:
-                        print('Dict mismatch. Training not complete yet.')
-                        continue
-                    _, _, Y, id_trIdx = test(net, testloader, talk=True)[2]
-                    assert len(Y) == testObj.idx.shape[0], "Something went wrong"
+            fold = 20
+            print('fold: {}'.format(fold))
+            path2weight = os.path.join(path2weights, 'PrTest_{}_model_{}_fold_{}.pt'.format(PrIdx, model_num+1, fold))
+            if os.path.exists(path2weight):
+                try:
+                    net.load_state_dict(torch.load(path2weight)['net_params'])
+                except:
+                    print('Dict mismatch. Training not complete yet.')
+                    continue
+                _, _, Y, id_trIdx = test(net, testloader, talk=True)[2]
+                assert len(Y) == testObj.idx.shape[0], "Something went wrong"
 
-                    for i, y in enumerate(Y):
-                        PrIdx = id_trIdx[i, 0]
-                        TrIdx = id_trIdx[i, 1]
-                        fsave = os.path.join(os.getcwd(),
-                                             'outputs',
-                                             'PrIdx_{}_TrIdx_{}_Lbr_{}_fold_0.mat'.format(PrIdx, int(TrIdx), ModelID[model_num]))
-                        scio.savemat(fsave, {'Labels': y.reshape(-1, 1),
-                                      'PrIdx': PrIdx,
-                                      'TrIdx': TrIdx})
-                else:
-                    print('Weights for this model does not exist')
+                for i, y in enumerate(Y):
+                    PrIdx = id_trIdx[i, 0]
+                    TrIdx = id_trIdx[i, 1]
+                    fsave = os.path.join(os.getcwd(),
+                                         'outputs',
+                                         'PrIdx_{}_TrIdx_{}_Lbr_{}_fold_20.mat'.format(PrIdx, int(TrIdx), ModelID[model_num]))
+                    scio.savemat(fsave, {'Op': y.reshape(-1, 1),
+                                         'Labels': testObj.data['target']
+                                  'PrIdx': PrIdx,
+                                  'TrIdx': TrIdx})
+            else:
+                print('Weights for this model does not exist')
 
 
 

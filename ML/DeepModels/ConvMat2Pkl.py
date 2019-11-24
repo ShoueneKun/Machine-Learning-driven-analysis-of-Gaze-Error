@@ -10,7 +10,6 @@ import numpy as np
 import pickle
 import torch
 import itertools
-import copy
 import os
 DATA_PATH = os.getcwd()
 
@@ -19,6 +18,7 @@ class makeparams():
         self.PrTest_List = [1, 2, 3, 6, 8, 9, 12, 16, 17, 22]
         self.prec = torch.float32
 
+'''
 def upsample(Chunks, ratio=1):
     class_rat = np.stack(Chunks['freq'], axis=0)
     loc = np.where(class_rat[:, 1] > 0.1)[0] # All pursuit samples
@@ -27,7 +27,7 @@ def upsample(Chunks, ratio=1):
     for key in Chunks.keys():
         for idx in loc:
             Chunks_append[key].append(Chunks[key][idx])
-    list_dict = list(copy.deepcopy(Chunks_append) for i in range(0, 24))
+    list_dict = list(copy.deepcopy(Chunks_append) for i in range(0, 6))
     list_dict.append(Chunks)
     D = concat_dicts(list_dict)
 
@@ -36,6 +36,7 @@ def upsample(Chunks, ratio=1):
     print('Upsampled pursuits. The new ratio is ...')
     print('Ratio of pursuit chunks: {}'.format(100*len(loc)/class_rat.shape[0]))
     return D
+'''
 
 def concat_dicts(list_dict):
     D = {key:[] for key in list_dict[0].keys()}
@@ -126,7 +127,7 @@ Weights = Dataset['Weights']
 ID = np.asarray(Dataset['ID'])
 
 SeqTensors, SeriesTensors = dataGen(Chunks, Data, Targets, Weights, ID, params.prec)
-UpSeqTensors = upsample(SeqTensors)
+#UpSeqTensors = upsample(SeqTensors)
 f = open(os.path.join(DATA_PATH, 'Data', 'Data.pkl'), 'wb')
-pickle.dump([UpSeqTensors, SeriesTensors], f)
+pickle.dump([SeqTensors, SeriesTensors], f)
 

@@ -19,6 +19,7 @@ from DataLoader import splitdata, GIW_readChunk, GIW_readSeq
 if __name__=='__main__':
     print('Training ...' )
     args = parse_args()
+    args.prec = torch.float64
 
     if args.modeltype == 1:
         print('Model 1. GIW journal.')
@@ -63,10 +64,10 @@ if __name__=='__main__':
         # Path to save model
         args.path2save = os.path.join(os.getcwd(), 'weights', 'PrTest_{}_model_{}_fold_{}.pt'.format(args.PrTest, args.modeltype, k))
 
-        TBwriter = SummaryWriter(os.path.join(os.getcwd(), 'TB.lock', '{}_{}_'.format(args.modeltype, k)+str(now)))
+        TBwriter = SummaryWriter(os.path.join(os.getcwd(), 'TB.lock', 'kfold_{}_{}_'.format(args.modeltype, k)+str(now)))
         print('Fold: {}'.format(k))
-        trainObj = GIW_readChunk(chunk, trainIdx[k])
-        validObj = GIW_readChunk(chunk, validIdx[k])
+        trainObj = GIW_readChunk(chunk, trainIdx[k], oversample=0, perturbate=True)
+        validObj = GIW_readChunk(chunk, validIdx[k], oversample=0, perturbate=False)
         trainloader = torch.utils.data.DataLoader(trainObj,
                                                   shuffle=True,
                                                   batch_size=args.batchsize,
@@ -77,7 +78,7 @@ if __name__=='__main__':
                                                   num_workers=torch.cuda.device_count())
 
         net = []
-        net = model().cuda().to(torch.float32)
+        net = model().to(args.prec).cuda()
         print(net)
         torch.cuda.manual_seed(32)
         if torch.cuda.device_count() > 1:

@@ -17,9 +17,12 @@ function [trainData, Targets, Chunks, W] = genSeqSeries(ExpData, W_ip)
 % Do not use dimension 18 in ExpData. Instead, pass it as an input argument
 % because the weights may need to consider multiple labellers.
 
+% Note that all samples with a confidence below 0.1 from Pupil labs are
+% removed from training.
+
 featSpace_vec = 2:10;
 featSpace_vel = [11, 14:15, 12, 16:17, 13, 18:19];
-MaxSeqLen = 1024;
+MaxSeqLen = 240; %1024
 W = W_ip;
 labels = fillGap(ExpData(:, 25), 5);
 
@@ -34,11 +37,9 @@ Len(loc) = []; StartEnd_idx(loc, :) = [];
 % Correct Targets
 labels = convertLabels(labels(:));
 labels_mod = labels;
-% labels_mod(W_ip < 0.2) = -1;
+labels_mod(ExpData(:, 24) < 0.2) = -1;
 
-% For samples not to be included, replace weight with 0.01 for numerical
-% stability
-% W_ip(W_ip < 0.2) = 0.01;
+W_ip(ExpData(:, 24) < 0.2) = 0.00;
 
 % Find all sequences which atleast 20 continuous samples in it
 loc = find(Len >= 20);

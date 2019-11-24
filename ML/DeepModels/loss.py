@@ -70,10 +70,10 @@ def kappa_confusion(cmat):
 # Loss functions
 def loss_giw(ip, target, weight, ignore_index):
     loss1 = torch.mean(loss_ce(ip, target, weight, ignore_index))
-    GD = GeneralizedDiceLoss(ignore_index=ignore_index).cuda()
-    loss2 = GD(ip, target)
-    loss = loss1 + loss2
-    return loss, loss1.detach().cpu().item(), loss2.detach().cpu().item()
+    #GD = GeneralizedDiceLoss(ignore_index=ignore_index).cuda().to(torch.float64)
+    #loss2 = GD(ip, target)
+    loss = loss1.to(torch.float64) #+ loss2.to(torch.float64)
+    return loss, loss1.detach().cpu().item(), 0.0
 
 def loss_giw_dual(ip, target, weight, ignore_index, task_2):
     loss1 = torch.mean(loss_ce(ip[:,:3,:], target, weight, ignore_index))
@@ -87,13 +87,18 @@ def loss_ce(ip, target, weight, ignore_index):
     # Computes the loss based on given input and target.
     # Input: batch, sequence, features
     # Target: batch, sequence, class
-    #cE = torch.nn.CrossEntropyLoss(reduction='none', ignore_index=-1)
-    #loss_ce = cE(ip, target.to(torch.long))
-    cE = torch.nn.CrossEntropyLoss(reduction='none', ignore_index=-1, weight=torch.tensor([0.3, 0.8, 0.5]).cuda())
+    '''
+    cE = torch.nn.CrossEntropyLoss(ignore_index=-1, weight=torch.tensor([0.3, 0.9, 0.5]).cuda().to(torch.float64))
+    loss_ce = cE(ip, target.to(torch.long))
+    '''
+
+    cE = torch.nn.CrossEntropyLoss(reduction='none',
+                                   ignore_index=-1,
+                                   weight=torch.tensor([0.3, 0.9, 0.5]).cuda().to(torch.float64))
     sampleWeight = weight/torch.sum(weight, dim=1, keepdim=True)
     loss_ce = sampleWeight*cE(ip, target.to(torch.long))
-
     loss_ce = torch.sum(loss_ce, dim=1)
+
     return loss_ce
 
 class GeneralizedDiceLoss(torch.nn.Module):
@@ -117,11 +122,11 @@ class GeneralizedDiceLoss(torch.nn.Module):
         mask = torch.stack(mask, dim=1)
         mask.requires_grad = False
 
-        ip = ip*mask.to(torch.float)
+        ip = ip*mask.to(torch.float64)
 
         # Rapid way to convert to one-hot. For future version, use functional
         Label = (np.arange(3) == target.cpu().numpy()[..., None]).astype(np.uint8)
-        target = torch.from_numpy(np.rollaxis(Label, 2, start=1)).cuda()
+        target = torch.from_numpy(np.rollaxis(Label, 2, start=1)).cuda().to(torch.float64)
 
         if not (ip.shape == target.shape):
             print('Shapes do not match')

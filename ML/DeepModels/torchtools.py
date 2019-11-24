@@ -77,6 +77,7 @@ class EarlyStopping:
             print('Validation metric decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(self.val_loss_min, val_loss.item()))
         elif self.verbose and self.mode is 'max':
             print('Validation metric increased ({:.6f} --> {:.6f}).  Saving model ...'.format(self.val_loss_min, val_loss.item()))
+        print('Saving model ...')
         self.best_model['net_params'] = copy.deepcopy(model_dict)
         self.best_model['eps'] = eps
         self.best_model['metric'] = val_loss
@@ -89,3 +90,15 @@ def verify_weights(best_model_dict, net_dict):
             print('WTF! Values do not match')
         else:
             print('Match')
+
+def modLr(val, valRange, lrRange, strType):
+    if strType is 'linear':
+        # Lineary changes the learning rate
+        val = np.max(valRange) if val > np.max(valRange) else val
+        val = np.min(valRange) if val < np.min(valRange) else val
+        m = np.diff(lrRange)/np.diff(valRange)
+        c = lrRange[1] - m*valRange[1]
+        return float(val*m + c)
+    else:
+        # Gamma change in learning rate
+        sys.exit('Entry not defined')
