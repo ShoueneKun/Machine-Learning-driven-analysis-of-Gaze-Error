@@ -95,7 +95,7 @@ if __name__=='__main__':
 
         # Load saved best model
         net.load_state_dict(torch.load(args.path2save)['net_params'])
-        perf_test_saved = test(net, testloader, True)[1]
+        perf_test_saved = test(net, testloader, args, True)[1]
 
         print('Best valid kappa: {}'.format(best_model['metric']))
         print('Best saved test kappa: {}'.format(perf_test_saved.getPerf(0, 'kappa')))

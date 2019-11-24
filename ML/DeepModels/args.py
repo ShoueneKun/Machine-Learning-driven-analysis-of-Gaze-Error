@@ -15,8 +15,8 @@ def parse_args():
     parser.add_argument('--PrTest', type=int, default=1)
     parser.add_argument('--lr', type=float, default=5e-4)
     parser.add_argument('--batchsize', type=int, default=50)
-    parser.add_argument('--modeltype', type=int, default=1)
-    parser.add_argument('--epochs', type=int, default=1000)
+    parser.add_argument('--modeltype', type=int, default=7)
+    parser.add_argument('--epochs', type=int, default=300)
     parser.add_argument('--folds', type=int, default=5)
     parser.add_argument('--path2data', type=str,
                         default=os.path.join(os.getcwd(), 'Data'))

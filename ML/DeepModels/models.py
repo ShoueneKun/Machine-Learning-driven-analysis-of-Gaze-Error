@@ -17,14 +17,14 @@ class model_1(torch.nn.Module):
     def __init__(self):
         super(model_1, self).__init__()
         self.num_layers = 3
-        self.dp = torch.nn.Dropout(p=0.00)
+        self.dp = torch.nn.Dropout(p=0.10)
         self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=12*3, out_dim=8, dp=0.0)
         self.RNN_stack = torch.nn.GRU(input_size=8,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
                                       bidirectional=True,
-                                      dropout=0.00)
+                                      dropout=0.10)
 
         self.fc = torch.nn.Linear(24*2, 3)
         self = weights_init(self)
@@ -49,14 +49,14 @@ class model_2(torch.nn.Module):
     def __init__(self):
         super(model_2, self).__init__()
         self.num_layers = 3
-        self.dp = torch.nn.Dropout(p=0.00)
+        self.dp = torch.nn.Dropout(p=0.10)
         self.linear_stack= linStack(self.num_layers, in_dim=3, hidden_dim=12*3, out_dim=8, dp=0.0)
         self.RNN_stack = torch.nn.GRU(input_size=8,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
                                       bidirectional=True,
-                                      dropout=0.0)
+                                      dropout=0.10)
 
         self.fc = torch.nn.Linear(24*2, 3)
         self = weights_init(self)
@@ -81,14 +81,14 @@ class model_3(torch.nn.Module):
     def __init__(self):
         super(model_3, self).__init__()
         self.num_layers = 3
-        self.dp = torch.nn.Dropout(p=0.00)
+        self.dp = torch.nn.Dropout(p=0.10)
         self.linear_stack= linStack(self.num_layers, in_dim=2, hidden_dim=12*3, out_dim=8, dp=0.0)
         self.RNN_stack = torch.nn.GRU(input_size=8,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
                                       bidirectional=True,
-                                      dropout=0.0)
+                                      dropout=0.10)
 
         self.fc = torch.nn.Linear(24*2, 3)
         self = weights_init(self)
@@ -113,14 +113,14 @@ class model_4(torch.nn.Module):
     def __init__(self):
         super(model_4, self).__init__()
         self.num_layers = 3
-        self.dp = torch.nn.Dropout(p=0.00)
+        self.dp = torch.nn.Dropout(p=0.100)
         self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=12*3, out_dim=8, dp=0.0)
         self.RNN_stack = torch.nn.GRU(input_size=8,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
                                       bidirectional=False,
-                                      dropout=0.0)
+                                      dropout=0.10)
 
         self.fc = torch.nn.Linear(24, 3)
         self = weights_init(self)
@@ -145,14 +145,14 @@ class model_5(torch.nn.Module):
     def __init__(self):
         super(model_5, self).__init__()
         self.num_layers = 3
-        self.dp = torch.nn.Dropout(p=0.00)
+        self.dp = torch.nn.Dropout(p=0.100)
         self.linear_stack= linStack(self.num_layers, in_dim=3, hidden_dim=12*3, out_dim=8, dp=0.0)
         self.RNN_stack = torch.nn.GRU(input_size=8,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
                                       bidirectional=True,
-                                      dropout=0.0)
+                                      dropout=0.10)
 
         self.fc = torch.nn.Linear(24*2, 3)
         self = weights_init(self)
@@ -237,7 +237,7 @@ class model_7(torch.nn.Module):
         assert not (torch.isnan(target).any() or torch.isinf(target).any()), "NaN or Inf found in target"
         assert not (torch.isnan(weight).any() or torch.isinf(weight).any()), "NaN or Inf found in weight"
 
-        giw_vel = x[:,:,6:].cuda()
+        giw_vel = x[:,:,6:].cuda().to(torch.float64)
 
         # All packing and unpacking will be done inside forward
         x = x[:,:,:6].cuda()
@@ -254,14 +254,14 @@ class model_8(torch.nn.Module):
     def __init__(self):
         super(model_8, self).__init__()
         self.num_layers = 3
-        self.dp = torch.nn.Dropout(p=0.10)
+        self.dp = torch.nn.Dropout(p=0.00)
         self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=12*3, out_dim=8, dp=0.0)
         self.RNN_stack = torch.nn.GRU(input_size=8,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
                                       bidirectional=True,
-                                      dropout=0.10)
+                                      dropout=0.00)
 
         self.fc = torch.nn.Linear(24*2, 3)
         self = weights_init(self)

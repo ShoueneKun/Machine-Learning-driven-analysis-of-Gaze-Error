@@ -70,17 +70,18 @@ def kappa_confusion(cmat):
 # Loss functions
 def loss_giw(ip, target, weight, ignore_index):
     loss1 = torch.mean(loss_ce(ip, target, weight, ignore_index))
-    #GD = GeneralizedDiceLoss(ignore_index=ignore_index).cuda().to(torch.float64)
-    #loss2 = GD(ip, target)
-    loss = loss1.to(torch.float64) #+ loss2.to(torch.float64)
-    return loss, loss1.detach().cpu().item(), 0.0
+    GD = GeneralizedDiceLoss(ignore_index=ignore_index).cuda().to(torch.float64)
+    loss2 = GD(ip, target)
+    loss = loss1.to(torch.float64) + loss2.to(torch.float64)
+    return loss, loss1.detach().cpu().item(), loss2.detach().cpu()
 
 def loss_giw_dual(ip, target, weight, ignore_index, task_2):
+    # Note that is important to add an eps value.
     loss1 = torch.mean(loss_ce(ip[:,:3,:], target, weight, ignore_index))
-    GD = GeneralizedDiceLoss(ignore_index=ignore_index).cuda()
+    GD = GeneralizedDiceLoss(ignore_index=ignore_index).cuda().to(torch.float64)
     loss2 = GD(ip[:,:3,:], target)
-    loss3 = torch.nn.MSELoss()
-    loss = loss1 + loss2 + loss3(ip[:,3:,:], task_2)
+    loss3 = torch.nn.SmoothL1Loss().to(torch.float64)
+    loss = loss1.to(torch.float64) + loss2.to(torch.float64) + loss3(ip[:,3:,:] + 1e-5, task_2 + 1e-6).to(torch.float64)
     return loss, loss1.detach().cpu().item(), loss2.detach().cpu().item()
 
 def loss_ce(ip, target, weight, ignore_index):

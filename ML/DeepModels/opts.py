@@ -40,8 +40,6 @@ def train(net, trainloader, validloader, testloader, TBwriter, args):
         perf['loss_dl'] = np.mean(gDL)
         trainTrack.addEntry(eps, 0, perf)
 
-        # Calculate test performance
-        perf_test = test(net, testloader, args, 0)[1]
         for param_group in optimizer.param_groups:
             param_group['lr'] = modLr(trainTrack.getPerf(eps, 'kappa'), [0, 1], [args.lr, 1e-2*args.lr], 'linear')
 
@@ -84,9 +82,15 @@ def train(net, trainloader, validloader, testloader, TBwriter, args):
                     validTrack.getPerf(eps, 'recall'),
                     validTrack.getPerf(eps, 'kappa_evt')))
 
+            # Calculate test performance
+            perf_test = test(net, testloader, args, cond.update_flag)[1]
+
             # Update tensorboard
             update_tensorboard(TBwriter, trainTrack, validTrack, perf_test, eps)
         else:
+            # Calculate test performance
+            perf_test = test(net, testloader, args, 0)[1]
+
             # No testing set. Validate on testing subject.
             cond(eps, perf_test.getPerf(0, 'kappa'),
                  net.state_dict() if torch.cuda.device_count() == 1 else net.module.state_dict())
@@ -194,8 +198,8 @@ def test(net, testloader, args, talk=False):
             ID.append(id_trx.numpy())
         perf = getPerformance(np.hstack(GT), np.hstack(Y), calc_evt=False)
         perf['loss'] = np.mean(L)
-        perf['loss_ce'] = np.mean(loss_ce)
-        perf['loss_dl'] = np.mean(loss_dl)
+        perf['loss_ce'] = np.mean(ceL)
+        perf['loss_dl'] = np.mean(gDL)
         testTrack.addEntry(0, 0, perf)
     if talk:
         print('[UPDATE] eps: {}. k: {}. p: {}. r: {}. k_evt: {}'.format(
