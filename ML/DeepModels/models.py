@@ -50,7 +50,7 @@ class model_2(torch.nn.Module):
         super(model_2, self).__init__()
         self.num_layers = 3
         self.dp = torch.nn.Dropout(p=0.10)
-        self.linear_stack= linStack(self.num_layers, in_dim=3, hidden_dim=12*3, out_dim=8, dp=0.0)
+        self.linear_stack= linStack(self.num_layers, in_dim=1, hidden_dim=12*3, out_dim=8, dp=0.0)
         self.RNN_stack = torch.nn.GRU(input_size=8,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
@@ -67,7 +67,7 @@ class model_2(torch.nn.Module):
         assert not (torch.isnan(weight).any() or torch.isinf(weight).any()), "NaN or Inf found in weight"
 
         # All packing and unpacking will be done inside forward
-        x = x[:,:,:3].cuda()
+        x = x[:,:,0].cuda()
         # The data structure at this point is (batch, sequence, features)
         x = self.linear_stack(x)
         x = self.dp(x)

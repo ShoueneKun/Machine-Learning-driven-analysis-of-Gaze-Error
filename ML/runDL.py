@@ -24,7 +24,7 @@ from DeepModels.DataLoader import GIW_readSeq
 
 '''
 WARNING
-This is a slow process
+This is a slow process - This script takes over 1 hour.
 '''
 
 if __name__=='__main__':
@@ -36,8 +36,9 @@ if __name__=='__main__':
     ID_info = np.stack(seq['id'], axis=0)
 
     PrList = [1, 2, 3, 6, 8, 9, 12, 16, 17, 22]
-    ModelPresent = list(range(0, 7))
-    ModelID = [14, 24, 34, 44, 54, 64, 74]
+    ModelPresent = list(range(0, 9))
+    ModelPresent = [x for x in ModelPresent if x not in [6, 7]] # Remove these from analysis
+    ModelID = [14, 24, 34, 44, 54, 64, 74, 84, 94]
     for PrIdx in PrList:
         print('Evaluating PrIdx: {}'.format(PrIdx))
         testObj = GIW_readSeq(seq, PrIdx)
@@ -50,6 +51,7 @@ if __name__=='__main__':
             model = eval('model_{}'.format(model_num+1))
             net = model().cuda().to(args.prec)
             best = 0
+
             for fold in range(0, args.folds):
                 print('fold: {}'.format(fold))
                 path2weight = os.path.join(path2weights, 'PrTest_{}_model_{}_fold_{}.pt'.format(int(PrIdx), int(model_num+1), fold))
@@ -59,19 +61,24 @@ if __name__=='__main__':
                     except:
                         print('Dict mismatch. Training not complete yet.')
                         continue
-                    _, perf_test, Y, id_trIdx = test(net, testloader, talk=True)
+                    _, perf_test, Y, id_trIdx = test(net, testloader, args, talk=True)
+
                     assert len(Y) == testObj.idx.shape[0], "Something went wrong"
+
                     if perf_test.getPerf(0, 'kappa') > best:
-                        best = perf_test.getPerf(0,0,'kappa')
+                        print('Updating best fold ...')
+                        best = perf_test.getPerf(0, 'kappa')
                         for i, y in enumerate(Y):
                             TrIdx = id_trIdx[i, 1]
                             fsave = os.path.join(os.getcwd(),
                                                  'outputs_kfold',
                                                  'PrIdx_{}_TrIdx_{}_Lbr_{}_WinSize_0.mat'.format(PrIdx, int(TrIdx), ModelID[model_num]))
-                            scio.savemat(fsave, {'Y': y.reshape(-1, 1),
+                            # Note the +1. This is important because all subsequent
+                            # analysis assumes fixation:1. Pursuit:2.Saccade:3.
+                            scio.savemat(fsave, {'Y': y.reshape(-1, 1) + 1,
                                           'PrIdx': PrIdx,
                                           'TrIdx': TrIdx,
-                                          'Lbr': ModelID[model_num]})
+                                          'classifierType': ModelID[model_num]})
                     else:
                         print('Best fold found. Ignoring fold: {}'.format(fold))
                 else:

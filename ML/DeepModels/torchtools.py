@@ -6,6 +6,7 @@ Created on Fri Nov  8 15:46:57 2019
 @author: rakshit
 """
 import os
+import sys
 import copy
 import torch
 import numpy as np
@@ -91,7 +92,7 @@ def verify_weights(best_model_dict, net_dict):
         else:
             print('Match')
 
-def modLr(val, valRange, lrRange, strType):
+def modVal(val, valRange, lrRange, strType):
     if strType is 'linear':
         # Lineary changes the learning rate
         val = np.max(valRange) if val > np.max(valRange) else val

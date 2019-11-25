@@ -66,10 +66,12 @@ if __name__=='__main__':
                     fsave = os.path.join(os.getcwd(),
                                          'outputs_notest',
                                          'PrIdx_{}_TrIdx_{}_Lbr_{}_WinSize_0.mat'.format(int(PrIdx), int(TrIdx), ModelID[model_num]))
-                    scio.savemat(fsave, {'Y': y.reshape(-1, 1),
+                    # Note the +1. This is important because all subsequent
+                    # analysis assumes fixation:1. Pursuit:2.Saccade:3.
+                    scio.savemat(fsave, {'Y': y.reshape(-1, 1) + 1,
                                          'PrIdx': PrIdx,
                                          'TrIdx': TrIdx,
-                                         'Lbr': ModelID[model_num]})
+                                         'classifierType': ModelID[model_num]})
             else:
                 print('Weights for this model does not exist')
 

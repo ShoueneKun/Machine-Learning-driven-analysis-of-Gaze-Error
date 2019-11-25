@@ -74,9 +74,10 @@ for Clx_id = 1:length(D_clx)
             elseif strcmp(classifierType, 'MLP')
                 [~, Y] = max(net(testData'), [], 1);
             end
-                
-            LabelStruct_X = GenerateLabelStruct(Y, ProcessData.T);
-%             LabelStruct_X = RemoveEvents(LabelStruct_X, ProcessData, 1);
+            
+            % Remove impossible events as noted in the paper.
+            %LabelStruct_X = GenerateLabelStruct(Y, ProcessData.T);
+            %LabelStruct_X = RemoveEvents(LabelStruct_X, ProcessData, 1);
                         
             %% Plot figures
             if plotFigures
@@ -108,19 +109,19 @@ for Clx_id = 1:length(D_clx)
             end
             
             %% WARNING! The LabelData is being set to the classifier
-            LabelData = [];
-            LabelData.T = ProcessData.T;
-            LabelData.LabelStruct = LabelStruct_X;
-            LabelData.Labels = Y; %GenerateLabelsfromStruct(LabelData);
-            LabelData.PrIdx = PrTest;
-            LabelData.TrIdx = TrTest;
-            LabelData.LbrIdx = X_id;
-            LabelData.WinSize = WinSize;
+%             LabelData = [];
+%             LabelData.T = ProcessData.T;
+%             LabelData.LabelStruct = LabelStruct_X;
+%             LabelData.Labels = Y; %GenerateLabelsfromStruct(LabelData);
+%             LabelData.PrIdx = PrTest;
+%             LabelData.TrIdx = TrTest;
+%             LabelData.LbrIdx = X_id;
+%             LabelData.WinSize = WinSize;
             
             strPerf = fullfile(pwd, 'outputs_notest', sprintf('PrIdx_%d_TrIdx_%d_Lbr_%d_WinSize_%d.mat', PrTest, TrTest, X_id, WinSize));
-            save(strPerf, 'LabelData', 'PrTest', 'TrTest', 'Lbr', 'classifierType', 'Y', 'targets')
+            save(strPerf, 'PrTest', 'TrTest', 'Lbr', 'classifierType', 'Y')
             strPerf = fullfile(pwd, 'outputs_kfold', sprintf('PrIdx_%d_TrIdx_%d_Lbr_%d_WinSize_%d.mat', PrTest, TrTest, X_id, WinSize));
-            save(strPerf, 'LabelData', 'PrTest', 'TrTest', 'Lbr', 'classifierType', 'Y', 'targets')
+            save(strPerf, 'PrTest', 'TrTest', 'Lbr', 'classifierType', 'Y')
             
             fprintf('Done. Clx: %d, PrIdx: %d, TrIdx: %d, Lbr: %d\n', Clx_id, PrTest, TrTest, LbrIdx)
         end

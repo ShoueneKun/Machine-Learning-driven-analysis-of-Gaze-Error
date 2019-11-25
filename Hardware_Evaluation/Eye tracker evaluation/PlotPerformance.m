@@ -5,31 +5,6 @@ clc
 deg = 2;
 T = readtable('ETGCalib_ecc.csv');
 
-% PrNames = unique(T.PrName);
-% 
-% colors = linspecer(length(PrNames));
-% x = linspace(1, 20, 1000);
-% 
-% figure;
-% ax = subplot(1, 1, 1);
-% hold on
-% for i = 1:length(PrNames)
-%     loc = strcmp(T.PrName, PrNames(i));
-%     ecc = T.Ecc(loc);
-%     err = T.AngErr(loc);
-%     
-%     P = polyfit(ecc, err, deg);
-%     y = polyval(P, x); y(y < 0) = nan;
-%     plot(x, y, 'Color', colors(i, :))
-% %     scatter(ecc, err, [], repmat(colors(i, :), [length(err), 1]))
-% end
-% P = polyfit(T.Ecc, T.AngErr, deg);
-% y = polyval(P, x); y(y < 0) = nan;
-% plot(x, y, 'Color', [0, 0, 0], 'linewidth', 2)
-% legend([PrNames; {'Total'}])
-% xlabel('Eccentricity')
-% ylabel('Angular error in degrees')
-
 %% 
 
 figure;

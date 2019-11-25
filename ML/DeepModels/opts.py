@@ -1,10 +1,10 @@
 import torch
 import numpy as np
 from loss import getPerformance
-from torchtools import EarlyStopping, modLr
+from torchtools import EarlyStopping, modVal
 
 def train(net, trainloader, validloader, testloader, TBwriter, args):
-    cond = EarlyStopping(patience=75, mode='max', delta=5e-3, path2save=args.path2save, verbose=True)
+    cond = EarlyStopping(patience=75, mode='max', delta=1e-2, path2save=args.path2save, verbose=True)
     optimizer = torch.optim.Adam(net.parameters(), lr=args.lr, amsgrad=True)
 
     validTrack = trackPerf()
@@ -40,8 +40,9 @@ def train(net, trainloader, validloader, testloader, TBwriter, args):
         perf['loss_dl'] = np.mean(gDL)
         trainTrack.addEntry(eps, 0, perf)
 
+        # Reduce learning rate linearly as training progresses
         for param_group in optimizer.param_groups:
-            param_group['lr'] = modLr(trainTrack.getPerf(eps, 'kappa'), [0, 1], [args.lr, 1e-2*args.lr], 'linear')
+            param_group['lr'] = modVal(trainTrack.getPerf(eps, 'kappa'), [0, 1], [args.lr, 1e-2*args.lr], 'linear')
 
         if validloader:
             # Valid evaluation
@@ -75,6 +76,10 @@ def train(net, trainloader, validloader, testloader, TBwriter, args):
             cond(eps, validTrack.getPerf(eps, 'kappa'),
                  net.state_dict() if torch.cuda.device_count() == 1 else net.module.state_dict())
 
+            # Increase delta condition for model evaluation. This ensures that
+            # only large changes in validation metric warrants a testing update
+            cond.delta = modVal(validTrack.getPerf(eps, 'kappa'), [0, 1], [1e-2, 3e-2], 'linear')
+
             print('eps: {}. k: {}. p: {}. r: {}. k_evt: {}'.format(
                     eps,
                     validTrack.getPerf(eps, 'kappa'),
@@ -94,6 +99,11 @@ def train(net, trainloader, validloader, testloader, TBwriter, args):
             # No testing set. Validate on testing subject.
             cond(eps, perf_test.getPerf(0, 'kappa'),
                  net.state_dict() if torch.cuda.device_count() == 1 else net.module.state_dict())
+
+            # Increase delta condition for model evaluation. This ensures that
+            # only large changes in training metric warrants a testing update
+            cond.delta = modVal(trainTrack.getPerf(eps, 'kappa'), [0, 1], [1e-2, 3e-2], 'linear')
+
             print('eps: {}. k: {}. p: {}. r: {}. k_evt: {}'.format(
                     eps,
                     perf_test.getPerf(0, 'kappa'),
