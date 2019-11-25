@@ -67,7 +67,7 @@ class model_2(torch.nn.Module):
         assert not (torch.isnan(weight).any() or torch.isinf(weight).any()), "NaN or Inf found in weight"
 
         # All packing and unpacking will be done inside forward
-        x = x[:,:,0].cuda()
+        x = x[:,:,0].cuda().unsqueeze(-1)
         # The data structure at this point is (batch, sequence, features)
         x = self.linear_stack(x)
         x = self.dp(x)
