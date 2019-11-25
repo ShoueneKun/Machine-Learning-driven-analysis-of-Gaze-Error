@@ -9,9 +9,11 @@ txt = fscanf(fopen(fullfile(Path2Repo, 'path.json'), 'rb'), '%s');
 path_struct = jsondecode(txt);
 
 global Path2ProcessData Path2LabelData
+Path2ProcessData = fullfile(pwd, 'ProcessData');
+Path2LabelData = fullfile(pwd, 'Labels');
 
-Path2ProcessData = fullfile(path_struct.path2data, 'ProcessData');
-Path2LabelData = fullfile(path_struct.path2data, 'Labels');
+% Path2ProcessData = fullfile(path_struct.path2data, 'ProcessData');
+% Path2LabelData = fullfile(path_struct.path2data, 'Labels');
 
 ParticipantInfo = GetParticipantInfo();
 loc = cellfun(@isempty, {ParticipantInfo.Name});
@@ -172,6 +174,21 @@ nanmean([ResultsStruct.kappa_class], 2)
 
 %% Saving results
 save('PerformanceMatrix.mat', 'Classifier_SampleResults', 'Classifier_EvtResults', '-append')
+
+%% Load Kappa results
+load('kappaResults.mat')
+
+ZemPerf.PrIdx = cell2mat(PrIdx(:));
+ZemPerf.TrIdx = cell2mat(TrIdx(:));
+ZemPerf.WinSize = cell2mat(WinSize(:));
+ZemPerf.kappa_class = cell2mat(evtKappa(:));
+ZemPerf.ref_lbr = cell2mat(ref_LbrIdx(:));
+ZemPerf.test_lbr = cell2mat(test_LbrIdx(:));
+ZemPerf.kappa = cell2mat(allKappa(:));
+
+ZemPerf = struct2table(ZemPerf);
+loc = ZemPerf.TrIdx ~= 2;
+ZemPerf.kappa_class(loc, 2) = NaN;
 
 %% Generate Sample performance for Humans
 T = [];

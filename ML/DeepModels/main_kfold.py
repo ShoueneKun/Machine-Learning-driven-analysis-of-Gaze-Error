@@ -91,7 +91,7 @@ if __name__=='__main__':
 
         perf_valid, best_model = train(net, trainloader, validloader, testloader, TBwriter, args)
         net.load_state_dict(best_model['net_params'])
-        perf_test_run = test(net, testloader, True)[1]
+        perf_test_run = test(net, testloader, args, True)[1]
 
         # Load saved best model
         net.load_state_dict(torch.load(args.path2save)['net_params'])

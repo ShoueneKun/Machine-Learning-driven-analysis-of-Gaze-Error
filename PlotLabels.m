@@ -15,7 +15,7 @@ Path2LabelData = fullfile(path_struct.path2data, 'Labels');
 ParticipantInfo = GetParticipantInfo();
 
 disp('To plot all figures, set PrIdx = -1')
-PrIdx = 1;
+PrIdx = -1;
 TrIdx = 1;
 if PrIdx > 0
     D_pd = dir(fullfile(Path2ProcessData, sprintf('PrIdx_%d_TrIdx_%d.mat', PrIdx, TrIdx)));
@@ -33,9 +33,7 @@ for i = 1:length(D_pd)
     data = sscanf(D_pd(i).name, 'PrIdx_%d_TrIdx_%d.mat');
     PrIdx = data(1); TrIdx = data(2);
     str_ld = fullfile(Path2LabelData, sprintf('PrIdx_%d_TrIdx_%d_Lbr_*.mat', PrIdx, TrIdx));
-%     str_cx = fullfile(Path2Results, sprintf('PrIdx_%d_TrIdx_%d_Lbr_%d_WinSize_0.mat', PrIdx, TrIdx, ClxId));
     D_ld = dir(str_ld);
-%     D_cx = dir(str_cx);
     
     Age = ParticipantInfo(PrIdx).Age;
     
@@ -51,19 +49,14 @@ for i = 1:length(D_pd)
         ax = {};
         figure('Name',num2str(i),'units','normalized','outerposition',[0 0 1 1]);
         % Labels exist for this ProcessData mat file
-        for j = 1:(length(D_ld)+1)
+        for j = 1:length(D_ld)
             
             % Load relevant LabelData into workspace
-            if j <= length(D_ld)
-                load(fullfile(D_ld(j).folder, D_ld(j).name), 'LabelData')
-                data = sscanf(D_ld(j).name, 'PrIdx_%d_TrIdx_%d_Lbr_%d.mat');
-%             else
-%                 load(fullfile(D_cx.folder, D_cx.name), 'LabelData')
-%                 data(3) = ClxId;
-            end
+            load(fullfile(D_ld(j).folder, D_ld(j).name), 'LabelData')
+            data = sscanf(D_ld(j).name, 'PrIdx_%d_TrIdx_%d_Lbr_%d.mat');
             
             % Generate new axis for this Trial
-            ax{j} = subplot(length(D_ld)+1, 1, j); hold on;
+            ax{j} = subplot(length(D_ld), 1, j); hold on;
             plot(ax{j}, ProcessData.T(:), ProcessData.ETG.Az_Vel(:), 'Color', [0, 0, 1], 'LineStyle', '-')
             plot(ax{j}, ProcessData.T(:), ProcessData.ETG.El_Vel(:), 'Color', [0, 0, 1], 'LineStyle', '--')
             plot(ax{j}, ProcessData.T(:), ProcessData.IMU.Az_Vel(:), 'Color', [1, 0, 0], 'LineStyle', '-')

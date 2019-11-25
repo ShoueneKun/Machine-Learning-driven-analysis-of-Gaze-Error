@@ -93,7 +93,7 @@ def cal_from_mat(data_gt,data_pr):
 
 #%% setup parameters
 # human label data
-ROOT = '/run/user/1000/gvfs/smb-share:server=mvrlsmb.cis.rit.edu,share=performlab/FinalSet/Labels/'
+ROOT = os.path.join(os.getcwd(), 'Labels/')
 # classifier data
 ROOT_C = os.path.join(os.getcwd(), 'Data_EventMetrics/')
 
