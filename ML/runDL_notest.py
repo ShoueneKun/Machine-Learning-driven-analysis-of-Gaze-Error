@@ -37,7 +37,7 @@ if __name__=='__main__':
 
     PrList = [1, 2, 3, 6, 8, 9, 12, 16, 17, 22]
     ModelPresent = list(range(0, 9))
-    ModelPresent = [x for x in ModelPresent if x not in [6, 7]] # Remove these from analysis
+    ModelPresent = [x for x in ModelPresent if x not in [5, 6]] # Remove these from analysis
     ModelID = [14, 24, 34, 44, 54, 64, 74, 84, 94]
     for PrIdx in PrList:
         print('Evaluating PrIdx: {}'.format(PrIdx))

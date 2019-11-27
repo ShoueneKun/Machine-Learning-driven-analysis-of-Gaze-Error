@@ -4,7 +4,7 @@
 # Credit: Sanketh Moudgalya for sharing bash script
 
 spack load opencv ^python@3
-spack load /ou2ujbv # Load pytorch by hash
+spack load /jthz32l # Load pytorch by hash
 spack load /5gjrsa2 # Load torchvision by hash
 spack load /b4lfddj # Load scipy
 spack load /5kmm4sh # Load matplotlib

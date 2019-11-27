@@ -1,4 +1,4 @@
-clear all
+clearvars
 close all
 clc
 
@@ -9,24 +9,25 @@ txt = fscanf(fopen(fullfile(Path2Repo, 'path.json'), 'rb'), '%s');
 path_struct = jsondecode(txt);
 
 global Path2ProcessData Path2LabelData
-Path2ProcessData = fullfile(pwd, 'ProcessData');
-Path2LabelData = fullfile(pwd, 'Labels');
 
-% Path2ProcessData = fullfile(path_struct.path2data, 'ProcessData');
-% Path2LabelData = fullfile(path_struct.path2data, 'Labels');
+Path2ProcessData = fullfile(path_struct.path2data, 'ProcessData');
+Path2LabelData = fullfile(path_struct.path2data, 'Labels');
 
 ParticipantInfo = GetParticipantInfo();
 loc = cellfun(@isempty, {ParticipantInfo.Name});
 ParticipantInfo(loc) = [];
 PrPresent = 1:length(ParticipantInfo);
-loc = ismember({ParticipantInfo.Name}, {'7'});
+loc = ismember({ParticipantInfo.Name}, {'5', '7', '21'});
 ParticipantInfo(loc) = [];
 PrPresent(loc) = [];
 
-%%
 LabelerIdx = [1, 2, 3, 5, 6];
 TrialTypes = [1, 2, 3, 4];
 
+testCond = 'kfold'; % 'notest'
+useCleaned = 0;
+
+%% Load human data
 LabelSet = cell(length(LabelerIdx), length(PrPresent), length(TrialTypes));
 Cond = zeros(length(LabelerIdx), length(PrPresent), length(TrialTypes));
 
@@ -55,49 +56,10 @@ for i = 1:length(LabelerIdx)
     end
 end
 
-%% Find sample stats for each Pr
-% Important note. While finding statistics all trials are concatenated into
-% a single sequence for each labeller.
-
-HumanSample_Perf = cell(length(PrPresent), 6);
-HumanEvt_Perf = [];
-for i = 1:length(PrPresent)
-    LabelMat = cell2mat(squeeze(LabelSet(:, i, :))');
-    LabelMat(LabelMat == 5) = 1;
-    [HumanSample_Perf{i, 1}, HumanSample_Perf{i, 2},...
-        HumanSample_Perf{i, 3}, HumanSample_Perf{i, 4},...
-        HumanSample_Perf{i, 5}, HumanSample_Perf{i,6}, temp] = ...
-        ComputeCohenPerm(LabelMat);
-    HumanEvt_Perf = [HumanEvt_Perf; temp];
-end
-
-HumanEvt_Perf = cell2table(HumanEvt_Perf);
-HumanEvt_Perf.Properties.VariableNames={'WinSize', 'EER', 'fixF1', 'purF1', ...
-    'sacF1', 'l2', 'olr', 'conf_mat', 'kappa', 'kappa_class', 'nm_events', ...
-    'l2_b', 'olr_b', 'conf_mat_b', 'kappa_b', 'kappa_class_b', 'nm_events_b', 'DomSamp'};
-
-%% Quick Stats
-Kappa_m = nanmean(cell2mat(HumanSample_Perf(:, 1)));
-Kappa_std = nanstd(cell2mat(HumanSample_Perf(:, 1)));
-pc_m = nanmean(cell2mat(HumanSample_Perf(:, 2)));
-pc_std = nanstd(cell2mat(HumanSample_Perf(:, 2)));
-rc_m = nanmean(cell2mat(HumanSample_Perf(:, 3)));
-rc_std = nanstd(cell2mat(HumanSample_Perf(:, 3)));
-f_m = nanmean(cell2mat(HumanSample_Perf(:, 4)));
-f_std = nanstd(cell2mat(HumanSample_Perf(:, 4)));
-Kappa_class_m = nanmean(cell2mat(HumanSample_Perf(:, 6)));
-Kappa_class_std = nanstd(cell2mat(HumanSample_Perf(:, 6)));
-
-%% Normalized conf mat
-confmat_m = nanmean(cell2mat(permute(HumanSample_Perf(:, 5), [3, 2, 1])), 3);
-confmat_std = nanstd(cell2mat(permute(HumanSample_Perf(:, 5), [3, 2, 1])), [], 3);
-%% Save
-save('PerformanceMatrix.mat', 'HumanSample_Perf', 'HumanEvt_Perf')
-
 %% Generate LabelSet from classifiers
-Path2ClassifiedOp = fullfile(pwd, 'Data_EventMetrics');
-LabelerIdx = [11, 31, 12, 13, 14, 15, 24, 34, 44, 54, 63, 64, 65];
-WinSize = 0:3:21;
+Path2ClassifiedOp = fullfile(pwd, ['outputs_', testCond]);
+LabelerIdx = [11, 14, 24, 34, 44, 54];
+WinSize = 0:3:24;
 
 Clx_LabelSet = cell(length(LabelerIdx), length(PrPresent), length(WinSize), length(TrialTypes));
 
@@ -118,8 +80,13 @@ for i = 1:length(LabelerIdx)
                    Clx_LabelSet(i, j, :, TrIdx) = {zeros(N, 1)};
                 end
                 if exist(fullfile(Path2ClassifiedOp, strLabelData), 'file')
-                    load(fullfile(Path2ClassifiedOp, strLabelData), 'LabelData')
-                    Clx_LabelSet(i, j, k, TrIdx) = {LabelData.Labels};
+                    if useCleaned
+                        load(fullfile(Path2ClassifiedOp, strLabelData), 'LabelData_cleaned')
+                        Clx_LabelSet(i, j, k, TrIdx) = {double(LabelData_cleaned.Labels)};
+                    else
+                        load(fullfile(Path2ClassifiedOp, strLabelData), 'LabelData')
+                        Clx_LabelSet(i, j, k, TrIdx) = {double(LabelData.Labels)};
+                    end
                 else
                     fprintf('No labels for Pr: %d. Tr: %d. Lbr: %d. Win: %d\n', PrIdx, TrIdx, Lbr, Win)
                 end
@@ -132,6 +99,7 @@ end
 % Human labels are stored in LabelSet. LabelSet -> [Lbr, Pr, Tr]
 Classifier_SampleResults = {};
 Classifier_EvtResults = [];
+
 for i = 1:length(PrPresent)
     humandata = cell2mat(squeeze(LabelSet(:, i, :))');
     % Samples -> Concatenated labels from every trial
@@ -156,15 +124,16 @@ end
 Classifier_EvtResults = cell2table(Classifier_EvtResults);
 Classifier_EvtResults.Properties.VariableNames={'ref_LbrIdx', 'test_LbrIdx', 'WinSize', 'EER', 'fixF1', 'purF1', ...
     'sacF1', 'l2', 'olr', 'conf_mat', 'kappa', 'kappa_class', 'nm_events', ...
-    'l2_b', 'olr_b', 'conf_mat_b', 'kappa_b', 'kappa_class_b', 'nm_events_b', 'DomSamp'};
+    'l2_b', 'olr_b', 'conf_mat_b', 'kappa_b', 'kappa_class_b', 'nm_events_b'};
 
 % Classifier_SampleResults -> [PrIdx, Clx_id, WinSize]
 
 %% Quick stats
-% [11, 31, 12, 13, 14, 15, 24, 34, 44, 54, 63, 64, 65]
-% [ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13]
+% [RF, RNN, onlyEyes, onlyAbs, onlyForward, onlyGIW, DP]
+% [11, 14, 24, 34, 44, 54, 84]
+% [ 1,  2,  3,  4,  5,  6,  7]
 
-Clx_id = 5;
+Clx_id = 2;
 ResultsStruct = cell2mat(squeeze(Classifier_SampleResults(:, Clx_id, 1)));
 nanmean([ResultsStruct.kappa_class], 2)
 
@@ -173,10 +142,11 @@ nanmean([ResultsStruct.kappa_class], 2)
 % nanmean(table2array(Classifier_EvtResults(loc, [21])))
 
 %% Saving results
-save('PerformanceMatrix.mat', 'Classifier_SampleResults', 'Classifier_EvtResults', '-append')
+save(sprintf('PerformanceMatrix_%s.mat', testCond), 'Classifier_SampleResults', 'Classifier_EvtResults', 'useCleaned')
 
 %% Load Kappa results
-load('kappaResults.mat')
+load(sprintf('kappaResults_%s.mat', testCond))
+load('PerformanceMatrix.mat')
 
 ZemPerf.PrIdx = cell2mat(PrIdx(:));
 ZemPerf.TrIdx = cell2mat(TrIdx(:));
@@ -189,6 +159,18 @@ ZemPerf.kappa = cell2mat(allKappa(:));
 ZemPerf = struct2table(ZemPerf);
 loc = ZemPerf.TrIdx ~= 2;
 ZemPerf.kappa_class(loc, 2) = NaN;
+
+%% Human performance
+Kappa_m = nanmean(cell2mat(HumanSample_Perf(:, 1)));
+Kappa_std = nanstd(cell2mat(HumanSample_Perf(:, 1)));
+pc_m = nanmean(cell2mat(HumanSample_Perf(:, 2)));
+pc_std = nanstd(cell2mat(HumanSample_Perf(:, 2)));
+rc_m = nanmean(cell2mat(HumanSample_Perf(:, 3)));
+rc_std = nanstd(cell2mat(HumanSample_Perf(:, 3)));
+f_m = nanmean(cell2mat(HumanSample_Perf(:, 4)));
+f_std = nanstd(cell2mat(HumanSample_Perf(:, 4)));
+Kappa_class_m = nanmean(cell2mat(HumanSample_Perf(:, 6)));
+Kappa_class_std = nanstd(cell2mat(HumanSample_Perf(:, 6)));
 
 %% Generate Sample performance for Humans
 T = [];
@@ -226,20 +208,20 @@ ResultsStruct = cell2mat(squeeze(Classifier_SampleResults(:, Clx_id, end)));
 T(1, 2:end) = nanmean([ResultsStruct.kappa_class], 2);
 
 % biRNN
-Clx_id = 5;
+Clx_id = 2;
 ResultsStruct = cell2mat(squeeze(Classifier_SampleResults(:, Clx_id, 1)));
 T(2, 1) = nanmean([ResultsStruct.kappa], 2);
 
-Clx_id = 5;
+Clx_id = 2;
 ResultsStruct = cell2mat(squeeze(Classifier_SampleResults(:, Clx_id, 1)));
 T(2, 2:end) = nanmean([ResultsStruct.kappa_class], 2);
 
 % fRNN
-Clx_id = 10;
+Clx_id = 5;
 ResultsStruct = cell2mat(squeeze(Classifier_SampleResults(:, Clx_id, 1)));
 T(3, 1) = nanmean([ResultsStruct.kappa], 2);
 
-Clx_id = 10;
+Clx_id = 5;
 ResultsStruct = cell2mat(squeeze(Classifier_SampleResults(:, Clx_id, 1)));
 T(3, 2:end) = nanmean([ResultsStruct.kappa_class], 2);
 
@@ -247,23 +229,26 @@ T(3, 2:end) = nanmean([ResultsStruct.kappa_class], 2);
 T(4, 1) = Kappa_m;
 T(4, 2:end) = Kappa_class_m;
 
-%% Generae event performance using rest of the metrics
+%% Generate event performance using rest of the metrics
 T = [];
 
-loc = Classifier_EvtResults.test_LbrIdx == 11 & Classifier_EvtResults.WinSize == 21;
+% RF
+loc = Classifier_EvtResults.test_LbrIdx == 11 & Classifier_EvtResults.WinSize == 24;
 T(1, 1:3) = nanmean(table2array(Classifier_EvtResults(loc, [5, 6, 7])));
 T(1, 4) = nanmean(Classifier_EvtResults.EER(loc));
-loc = ZemPerf.test_lbr == 11 & ZemPerf.WinSize == 21;
+loc = ZemPerf.test_lbr == 11 & ZemPerf.WinSize == 24;
 T(1, 5:7) = nanmean(ZemPerf.kappa_class(loc, :));
 T(1, 8) = nanmean(ZemPerf.kappa(loc));
 
-loc = Classifier_EvtResults.test_LbrIdx == 54;
+% fRNN
+loc = Classifier_EvtResults.test_LbrIdx == 44;
 T(2, 1:3) = nanmean(table2array(Classifier_EvtResults(loc, [5, 6, 7])));
 T(2, 4) = nanmean(Classifier_EvtResults.EER(loc));
 loc = ZemPerf.test_lbr == 54;
 T(2, 5:7) = nanmean(ZemPerf.kappa_class(loc, :));
 T(2, 8) = nanmean(ZemPerf.kappa(loc));
 
+% biRNN
 loc = Classifier_EvtResults.test_LbrIdx == 14;
 T(3, 1:3) = nanmean(table2array(Classifier_EvtResults(loc, [5, 6, 7])));
 T(3, 4) = nanmean(Classifier_EvtResults.EER(loc));
@@ -271,6 +256,7 @@ loc = ZemPerf.test_lbr == 14;
 T(3, 5:7) = nanmean(ZemPerf.kappa_class(loc, :));
 T(3, 8) = nanmean(ZemPerf.kappa(loc));
 
+% Human
 T(4, 1:3) = nanmean(table2array(HumanEvt_Perf(:, [3, 4, 5])));
 T(4, 4) = nanmean(HumanEvt_Perf.EER);
 loc = ZemPerf.WinSize == -1;
@@ -281,15 +267,17 @@ T(4, 8) = nanmean(ZemPerf.kappa(loc));
 
 T = zeros(4, 1+3+3+3+3);
 
+% RF
 Clx_id = 11;
-loc = Classifier_EvtResults.test_LbrIdx == Clx_id & Classifier_EvtResults.WinSize == 21;
+loc = Classifier_EvtResults.test_LbrIdx == Clx_id & Classifier_EvtResults.WinSize == 24;
 T(1, 1) = nanmean(Classifier_EvtResults.kappa(loc));
 T(1, 2:4) = nanmean(Classifier_EvtResults.kappa_class(loc, 1:3));
 T(1, 5:7) = nanmean(Classifier_EvtResults.l2(loc, [1, 3, 5]))/0.3;
 T(1, 8:10) = nanmean(Classifier_EvtResults.olr(loc, [1, 3, 5]));
 T(1, 11:13) = nanstd(Classifier_EvtResults.l2(loc, [1, 3, 5]))/0.3;
 
-Clx_id = 54;
+% fRNN
+Clx_id = 44;
 loc = Classifier_EvtResults.test_LbrIdx == Clx_id;
 T(2, 1) = nanmean(Classifier_EvtResults.kappa(loc));
 T(2, 2:4) = nanmean(Classifier_EvtResults.kappa_class(loc, 1:3));
@@ -297,6 +285,7 @@ T(2, 5:7) = nanmean(Classifier_EvtResults.l2(loc, [1, 3, 5]))/0.3;
 T(2, 8:10) = nanmean(Classifier_EvtResults.olr(loc, [1, 3, 5]));
 T(2, 11:13) = nanstd(Classifier_EvtResults.l2(loc, [1, 3, 5]))/0.3;
 
+% biRNN
 Clx_id = 14;
 loc = Classifier_EvtResults.test_LbrIdx == Clx_id;
 T(3, 1) = nanmean(Classifier_EvtResults.kappa(loc));
@@ -305,6 +294,7 @@ T(3, 5:7) = nanmean(Classifier_EvtResults.l2(loc, [1, 3, 5]))/0.3;
 T(3, 8:10) = nanmean(Classifier_EvtResults.olr(loc, [1, 3, 5]));
 T(3, 11:13) = nanstd(Classifier_EvtResults.l2(loc, [1, 3, 5]))/0.3;
 
+% Human
 T(4, 1) = nanmean(HumanEvt_Perf.kappa);
 T(4, 2:4) = nanmean(HumanEvt_Perf.kappa_class(:, 1:3));
 T(4, 5:7) = nanmean(Classifier_EvtResults.l2(:, [1, 3, 5]))/0.3;
@@ -312,9 +302,12 @@ T(4, 8:10) = nanmean(Classifier_EvtResults.olr(:, [1, 3, 5]));
 T(4, 11:13) = nanstd(Classifier_EvtResults.l2(loc, [1, 3, 5]))/0.3;
 
 %% Generate sample performance for ablation
-% [11, 31, 12, 13, 14, 15, 24, 34, 44, 54, 63, 64, 65]
+% [RF, RNN, onlyEyes, onlyAbs, onlyForward, onlyGIW, DP]
+% [11, 14, 24, 34, 44, 54, 84]
+% [ 1,  2,  3,  4,  5,  6,  7]
+
 T = [];
-conds = [3, 4, 5, 6, 8, 9];
+conds = [3, 4, 2];
 T = zeros(length(conds), 4);
 
 for i = 1:length(conds)
@@ -327,7 +320,7 @@ end
 tbl1 = T;
 %% Generate event performance for ablation
 
-conds = [12, 13, 14, 15, 34, 44];
+conds = [24, 34, 14];
 % T = zeros(length(conds), 1+3*5+1);
 T = [];
 

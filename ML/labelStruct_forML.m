@@ -47,17 +47,17 @@ for i = 1:length(D)
             end
         end
         
-        LabelStruct = GenerateLabelStruct(Y, 1:length(Y));
-        LabelStruct = RemoveEvents(LabelStruct, ProcessData, 1);
+        LabelStruct = GenerateLabelStruct(Y, ProcessData.T);
         
-        LabelData = [];
-        LabelData.T = ProcessData.T(:);
-        LabelData.LabelStruct = LabelStruct;
-        LabelData.Labels = Y;
-        LabelData.PrIdx = PrTest;
-        LabelData.TrIdx = TrTest;
-        LabelData.LbrIdx = X_id;
-        LabelData.WinSize = WinSize;
-        save(strFile, 'LabelData', 'isCleaned', '-append')
+        % Provide two label structures - with and without post processing.
+        LabelData = []; LabelData_cleaned = [];
+        LabelData.T = ProcessData.T(:); LabelData_cleaned.T = ProcessData.T(:);
+        LabelData.LabelStruct = LabelStruct; LabelData_cleaned.LabelStruct = RemoveEvents(LabelStruct, ProcessData, 1);
+        LabelData.Labels = Y; LabelData_cleaned.Labels = GenerateLabelsfromStruct(LabelData_cleaned);
+        LabelData.PrIdx = PrTest; LabelData_cleaned.PrIdx = PrTest;
+        LabelData.TrIdx = TrTest; LabelData_cleaned.TrIdx = TrTest;
+        LabelData.LbrIdx = X_id; LabelData_cleaned.LbrIdx = X_id;
+        LabelData.WinSize = WinSize; LabelData_cleaned.WinSize = WinSize;
+        save(strFile, 'LabelData', 'LabelData_cleaned', 'isCleaned', '-append')
     end
 end

@@ -4,7 +4,7 @@
 # Credit: Sanketh Moudgalya for sharing bash script
 
 spack load opencv ^python@3
-spack load /ou2ujbv # Load pytorch by hash
+spack load /jthz32l # Load pytorch by hash
 spack load /5gjrsa2 # Load torchvision by hash
 spack load /b4lfddj # Load scipy
 spack load /5kmm4sh # Load matplotlib
@@ -24,7 +24,7 @@ do
     do
         baseJobName="kf_${PrIdx}_${model_num}"
         echo "Submitting $PrIdx"
-        echo -e "#!/bin/bash \n python3 main_kfold.py --PrTest=${PrIdx} --lr=1e-4 --modeltype=${model_num} --batchsize=64 --epochs=150" > command.lock
+        echo -e "#!/bin/bash \n python3 main_kfold.py --PrTest=${PrIdx} --lr=1e-4 --modeltype=${model_num} --batchsize=64 --epochs=250" > command.lock
         sbatch -J ${baseJobName} --output="rc_log_kfold/${PrIdx}_${model_num}.o" --error="rc_log_kfold/${PrIdx}_${model_num}.e" --mem=16G -n 1 -t 1-0:0:0 -p tier3 -A riteyes --gres=gpu:1 --mail-user=rsk3900@rit.edu --mail-type=ALL command.lock
     done
 done

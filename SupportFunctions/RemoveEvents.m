@@ -9,6 +9,9 @@ function LabelStruct = RemoveEvents(LabelStruct, ProcessData, isX)
     LabelData.LabelStruct = LabelStruct;
     LabelData.T = ProcessData.T;
     Labels = GenerateLabelsfromStruct(LabelData);
+    Labels = fillGap(Labels, curThres); % Fill empty 0s within 3 samples
+    
+    LabelStruct = GenerateLabelStruct(Labels, ProcessData.T);
     
     %% Merge fixations
     for i = 1:(length(LabelStruct) - 1)
@@ -21,7 +24,7 @@ function LabelStruct = RemoveEvents(LabelStruct, ProcessData, isX)
        if LabelStruct(i).Label == 1 && LabelStruct(i + 1).Label == 1
            % If the current and future labels are fixations, set them up
            % for merging.
-           if th < 0.5 || Dur < 150/1000
+           if th < 0.5 || Dur < 75/1000
                % If there hasn't been much movement or the duration elapsed
                % between two fixations is lesser than 150 ms, then merge
                % then under one fixation.
@@ -38,14 +41,25 @@ function LabelStruct = RemoveEvents(LabelStruct, ProcessData, isX)
     %% Saccade cure
     % Remove Saccades which are less than 6 ms in duration or greater than 
     % 150 ms.
-    loc = EventProps.Label == 3 & (EventProps.Dur < 0.006 | EventProps.Dur > 0.150);
+    loc1 = EventProps.Label == 3 & (EventProps.Dur < 0.006 | EventProps.Dur > 0.150);
+    
+    %% Fixation cure
+    loc2 = EventProps.Label == 1 & EventProps.Dur < 50/1000;
     
     %% Delete improbable events
-    LabelStruct(loc) = [];
+    LabelStruct(loc1 | loc2) = [];
     
     %% Fix Saccades start and ends
-    temp = LabelStruct;
     if ~isX
+        % Note that this process does not apply to the output from
+        % classifiers. This process simply improves the Saccade onset and
+        % offset locations made by labellers.
+        
+        % Reason for correction: Due to filtering, Saccade velocity curve
+        % tends to flatten out. Certain labellers used that as a metric to
+        % mark the onset and offset. However, ideally a labeller should
+        % also take into account the angular displacement - which does not
+        % happen in a few cases.
         [LabelStruct, ~] = cleanSaccades(LabelStruct, ProcessData);
     end
     
@@ -58,11 +72,17 @@ function [LabelStruct, changeFlag] = cleanSaccades(LabelStruct, ProcessData)
 %CLEANSACCADES This function fixes Saccade start and end time by
 %compressing or expanding the Saccade. Saccade expansion is part of future
 %work as it doesn't immediately affect the dataset.
-%   Saccade compression is not by shrinking evenly from each side untill we
-%   observe that the total Angular displacement hasn't changed. To ensure
-%   nuances from each individual labeller is maintained, we do not change
-%   Saccades unless they have a significant reduction.
-Thresh = 0.970;
+%   Saccade compression is achieved by shrinking evenly from each side 
+%   untill we observe that the total Angular displacement hasn't changed.
+%   To ensure nuances from each individual labeller is maintained, we do
+%   not modify Saccade labels unless they have a significant reduction.
+
+% Compression threshold dictates how much of their original angular
+% displacement is to be maintained. We retain 97% of the original
+% displacement. Furthermore, we modify the label locations IF and ONLY IF
+% the compression samples are more than 3 in each direction.
+
+Thresh = 0.970; % Compression threshold.
 T = ProcessData.T;
 changeFlag = zeros(length(LabelStruct), 1);
 

@@ -100,10 +100,6 @@ def train(net, trainloader, validloader, testloader, TBwriter, args):
             cond(eps, perf_test.getPerf(0, 'kappa'),
                  net.state_dict() if torch.cuda.device_count() == 1 else net.module.state_dict())
 
-            # Increase delta condition for model evaluation. This ensures that
-            # only large changes in training metric warrants a testing update
-            cond.delta = modVal(trainTrack.getPerf(eps, 'kappa'), [0, 1], [1e-2, 3e-2], 'linear')
-
             print('eps: {}. k: {}. p: {}. r: {}. k_evt: {}'.format(
                     eps,
                     perf_test.getPerf(0, 'kappa'),

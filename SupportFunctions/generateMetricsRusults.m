@@ -11,7 +11,7 @@ function [eventScores] = generateMetricsRusults(labelData_ref,labelData_test, wi
     labelStruct_ref = labelData_ref.LabelStruct;
     labelStruct_test = labelData_test.LabelStruct;
     %% New metric
-    res = newMetric(labelData_ref, labelData_test, grouporder, 1.5);
+    %res = newMetric(labelData_ref, labelData_test, grouporder, 1.5);
 
     %% EVENT-LEVEL METRICS %%
     % calculate Word Error Rate
@@ -33,6 +33,5 @@ function [eventScores] = generateMetricsRusults(labelData_ref,labelData_test, wi
     % create one row storing one comparison result to be added to the results
     eventScores = {labelData_ref.PrIdx, labelData_ref.TrIdx, labelData_ref.LbrIdx, labelData_test.LbrIdx,...
         winsize, wer, fixF1, purF1, sacF1, l2dis, olr, conf_mat, kappa(conf_mat), computeKappa_perClass(conf_mat),...
-        percent_detach, l2dis_b, olr_b, conf_mat_b, kappa(conf_mat_b), computeKappa_perClass(conf_mat_b), percent_detach_b, ...
-        res};
+        percent_detach, l2dis_b, olr_b, conf_mat_b, kappa(conf_mat_b), computeKappa_perClass(conf_mat_b), percent_detach_b};
 end

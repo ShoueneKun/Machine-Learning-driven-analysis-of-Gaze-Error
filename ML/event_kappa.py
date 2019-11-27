@@ -43,11 +43,11 @@ def calc_ke(etdata_gt,etdata_pr):
     #leaves original predictions untouched
     _etdata_gt = copy.deepcopy(etdata_gt)
     _etdata_pr = copy.deepcopy(etdata_pr)
-    
+
     #internal class mapping
     _etdata_gt.data['evt'] = class_map_func(_etdata_gt.data['evt'], class_mapper)
     _etdata_pr.data['evt'] = class_map_func(_etdata_pr.data['evt'], class_mapper)
-    
+
     #evaluate per trial
     ke, (evt_overlap, _evt_gt, _evt_pr) = eval_evt(_etdata_gt, _etdata_pr, len(classes))
     ke_single =tuple(ke[:3])
@@ -58,7 +58,8 @@ def cal_from_mat(data_gt,data_pr):
 #def cal_from_mat(data_pr,data_gt):
     T = data_gt['LabelData'][0][0]['T'].squeeze() #timestamps
     labels_gt = data_gt['LabelData'][0][0]['Labels'].squeeze() #ground truth labels
-    labels_pr = data_pr['LabelData'][0][0]['Labels'].squeeze() #predicted labels
+    #labels_pr = data_pr['LabelData_cleaned'][0][0]['Labels'].squeeze() #predicted labels
+    labels_pr = data_pr['LabelData_cleaned'][0][0]['Labels'].squeeze() if 'LabelData_cleaned' in data_pr.keys() else data_pr['LabelData'][0][0]['Labels'].squeeze()
     ### clean the data ###
     # convert label 5 to label 1 (optokinetic fixation to gaze fixation)
     labels_gt[labels_gt==5] = 1
@@ -92,11 +93,13 @@ def cal_from_mat(data_gt,data_pr):
     return ke, kappa_all
 
 #%% setup parameters
+
+cond = 'kfold' # 'notest'
+
 # human label data
 ROOT = '/run/user/1000/gvfs/smb-share:server=mvrlsmb.cis.rit.edu,share=performlab/FinalSet/Labels/'
 # classifier data
-ROOT_C = os.path.join(os.getcwd(), 'outputs_notest/')
-#ROOT_C = os.path.join(os.getcwd(), 'outputs_kfold/')
+ROOT_C = os.path.join(os.getcwd(), 'outputs_'+cond+'/')
 
 files = os.listdir(ROOT)
 files_c = os.listdir(ROOT_C)
@@ -154,8 +157,9 @@ for person in PrIds:
                 nums = [int(s) for s in re.findall(r'\d+',cls)]
                 ke_single = [person, trial, lbrId_gt, nums[2],nums[3],ke, kappa_all]
                 results.append(ke_single)
+
 mat2save = np.array(results)
 mat2save[mat2save[:,4]==None,4] = -1
 resultsDict = {"PrIdx":mat2save[:,0],"TrIdx":mat2save[:,1],"ref_LbrIdx":mat2save[:,2],"test_LbrIdx":mat2save[:,3],
              "WinSize":mat2save[:,4],"evtKappa":mat2save[:,5], "allKappa":mat2save[:,6]}
-scio.savemat('kappaResults.mat', resultsDict)
+scio.savemat('kappaResults_'+cond+'.mat', resultsDict)
