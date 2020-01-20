@@ -58,8 +58,8 @@ def cal_from_mat(data_gt,data_pr):
 #def cal_from_mat(data_pr,data_gt):
     T = data_gt['LabelData'][0][0]['T'].squeeze() #timestamps
     labels_gt = data_gt['LabelData'][0][0]['Labels'].squeeze() #ground truth labels
-    #labels_pr = data_pr['LabelData_cleaned'][0][0]['Labels'].squeeze() #predicted labels
-    labels_pr = data_pr['LabelData_cleaned'][0][0]['Labels'].squeeze() if 'LabelData_cleaned' in data_pr.keys() else data_pr['LabelData'][0][0]['Labels'].squeeze()
+    labels_pr = data_pr['LabelData'][0][0]['Labels'].squeeze() #predicted labels
+    #labels_pr = data_pr['LabelData_cleaned'][0][0]['Labels'].squeeze() if 'LabelData_cleaned' in data_pr.keys() else data_pr['LabelData'][0][0]['Labels'].squeeze()
     ### clean the data ###
     # convert label 5 to label 1 (optokinetic fixation to gaze fixation)
     labels_gt[labels_gt==5] = 1

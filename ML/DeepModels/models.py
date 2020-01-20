@@ -18,8 +18,8 @@ class model_1(torch.nn.Module):
         super(model_1, self).__init__()
         self.num_layers = 3
         self.dp = torch.nn.Dropout(p=0.10)
-        self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=12*3, out_dim=12, dp=0.0)
-        self.RNN_stack = torch.nn.GRU(input_size=12,
+        self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=12*3, out_dim=8, dp=0.0)
+        self.RNN_stack = torch.nn.GRU(input_size=8,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
@@ -50,8 +50,8 @@ class model_2(torch.nn.Module):
         super(model_2, self).__init__()
         self.num_layers = 3
         self.dp = torch.nn.Dropout(p=0.10)
-        self.linear_stack= linStack(self.num_layers, in_dim=1, hidden_dim=12*3, out_dim=12, dp=0.0)
-        self.RNN_stack = torch.nn.GRU(input_size=12,
+        self.linear_stack= linStack(self.num_layers, in_dim=1, hidden_dim=12*3, out_dim=8, dp=0.0)
+        self.RNN_stack = torch.nn.GRU(input_size=8,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
@@ -82,8 +82,8 @@ class model_3(torch.nn.Module):
         super(model_3, self).__init__()
         self.num_layers = 3
         self.dp = torch.nn.Dropout(p=0.10)
-        self.linear_stack= linStack(self.num_layers, in_dim=2, hidden_dim=12*3, out_dim=12, dp=0.0)
-        self.RNN_stack = torch.nn.GRU(input_size=12,
+        self.linear_stack= linStack(self.num_layers, in_dim=2, hidden_dim=12*3, out_dim=8, dp=0.0)
+        self.RNN_stack = torch.nn.GRU(input_size=8,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
@@ -114,8 +114,8 @@ class model_4(torch.nn.Module):
         super(model_4, self).__init__()
         self.num_layers = 3
         self.dp = torch.nn.Dropout(p=0.100)
-        self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=12*3, out_dim=12, dp=0.0)
-        self.RNN_stack = torch.nn.GRU(input_size=12,
+        self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=12*3, out_dim=8, dp=0.0)
+        self.RNN_stack = torch.nn.GRU(input_size=8,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
@@ -146,8 +146,8 @@ class model_5(torch.nn.Module):
         super(model_5, self).__init__()
         self.num_layers = 3
         self.dp = torch.nn.Dropout(p=0.100)
-        self.linear_stack= linStack(self.num_layers, in_dim=3, hidden_dim=12*3, out_dim=12, dp=0.0)
-        self.RNN_stack = torch.nn.GRU(input_size=12,
+        self.linear_stack= linStack(self.num_layers, in_dim=3, hidden_dim=12*3, out_dim=8, dp=0.0)
+        self.RNN_stack = torch.nn.GRU(input_size=8,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
@@ -221,8 +221,8 @@ class model_7(torch.nn.Module):
         super(model_7, self).__init__()
         self.num_layers = 3
         self.dp = torch.nn.Dropout(p=0.10)
-        self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=12*3, out_dim=12, dp=0.0)
-        self.RNN_stack = torch.nn.GRU(input_size=12,
+        self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=12*3, out_dim=8, dp=0.0)
+        self.RNN_stack = torch.nn.GRU(input_size=8,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,
@@ -255,8 +255,8 @@ class model_8(torch.nn.Module):
         super(model_8, self).__init__()
         self.num_layers = 3
         self.dp = torch.nn.Dropout(p=0.00)
-        self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=12*3, out_dim=12, dp=0.0)
-        self.RNN_stack = torch.nn.GRU(input_size=12,
+        self.linear_stack= linStack(self.num_layers, in_dim=6, hidden_dim=12*3, out_dim=8, dp=0.0)
+        self.RNN_stack = torch.nn.GRU(input_size=8,
                                       hidden_size=24,
                                       num_layers=self.num_layers,
                                       batch_first=True,

@@ -17,7 +17,7 @@ global Path2ProcessData Path2LabelData
 Path2ProcessData = fullfile(path_struct.path2data, 'ProcessData');
 Path2LabelData = fullfile(path_struct.path2data, 'Labels');
 
-D = dir(fullfile(pwd, 'outputs_notest', '*.mat'));
+D = dir(fullfile(pwd, 'outputs_kfold', '*.mat'));
 isCleaned = 1;
 
 for i = 1:length(D)

@@ -30,14 +30,14 @@ This is a slow process
 if __name__=='__main__':
     args = parse_args()
     args.prec = torch.float64
-    path2weights = '/home/rakshit/sporc/gaze-in-wild/ML/DeepModels/weights'
+    path2weights = '/home/rakshit/Documents/MATLAB/gaze-in-wild/ML/DeepModels/weights'
     f = open(os.path.join(os.path.join(os.getcwd(), 'DeepModels', 'Data'), 'Data.pkl'), 'rb')
     seq = pickle.load(f)[1]
     ID_info = np.stack(seq['id'], axis=0)
 
     PrList = [1, 2, 3, 6, 8, 9, 12, 16, 17, 22]
     ModelPresent = list(range(0, 9))
-    ModelPresent = [x for x in ModelPresent if x not in [5, 6]] # Remove these from analysis
+    ModelPresent = [x for x in ModelPresent if x not in [5, 6, 8]] # Remove these from analysis
     ModelID = [14, 24, 34, 44, 54, 64, 74, 84, 94]
     for PrIdx in PrList:
         print('Evaluating PrIdx: {}'.format(PrIdx))

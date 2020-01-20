@@ -154,7 +154,7 @@ ZemPerf.WinSize = cell2mat(WinSize(:));
 ZemPerf.kappa_class = cell2mat(evtKappa(:));
 ZemPerf.ref_lbr = cell2mat(ref_LbrIdx(:));
 ZemPerf.test_lbr = cell2mat(test_LbrIdx(:));
-ZemPerf.kappa = cell2mat(allKappa(:));
+ZemPerf.kappa = cell2mat(allKappa(:)); 
 
 ZemPerf = struct2table(ZemPerf);
 loc = ZemPerf.TrIdx ~= 2;
@@ -307,12 +307,17 @@ T(4, 11:13) = nanstd(Classifier_EvtResults.l2(loc, [1, 3, 5]))/0.3;
 % [ 1,  2,  3,  4,  5,  6,  7]
 
 T = [];
-conds = [3, 4, 2];
+% conds = [3, 4, 2];
+conds = [2, 3, 4, 5, 1];
 T = zeros(length(conds), 4);
 
 for i = 1:length(conds)
     Clx_id = conds(i);
-    data = cell2mat(squeeze(Classifier_SampleResults(:, Clx_id, :)));
+    if Clx_id == 1
+        data = cell2mat(squeeze(Classifier_SampleResults(:, Clx_id, end)));
+    else
+        data = cell2mat(squeeze(Classifier_SampleResults(:, Clx_id, 1)));
+    end
     data = struct2table(data(:));
     T(i, 1) = nanmean(data.kappa);
     T(i, 2:4) = nanmean(cell2mat(data.kappa_class(:)')');
@@ -320,13 +325,17 @@ end
 tbl1 = T;
 %% Generate event performance for ablation
 
-conds = [24, 34, 14];
+conds = [14, 24, 34, 44, 11];
 % T = zeros(length(conds), 1+3*5+1);
 T = [];
 
 for i = 1:length(conds)
     Clx_id = conds(i);
-    loc = Classifier_EvtResults.test_LbrIdx == Clx_id;
+    if Clx_id == 11
+        loc = Classifier_EvtResults.test_LbrIdx == Clx_id & Classifier_EvtResults.WinSize == 24;
+    else
+        loc = Classifier_EvtResults.test_LbrIdx == Clx_id & Classifier_EvtResults.WinSize == 0;
+    end
     T(i, 1) = nanmean(Classifier_EvtResults.kappa(loc));
     T(i, 2:4) = nanmean(Classifier_EvtResults.kappa_class(loc, 1:3));
     T(i, 5:7) = nanmean(Classifier_EvtResults.l2(loc, [1, 3, 5]))/0.3;
@@ -334,7 +343,11 @@ for i = 1:length(conds)
     T(i, 11:13) = nanmean(Classifier_EvtResults.olr(loc, [1, 3, 5]));
     T(i, 14:16) = nanmean(table2array(Classifier_EvtResults(loc, 5:7)));
     T(i, 17:19) = nanmean(Classifier_EvtResults.nm_events(loc, :));
-    loc = ZemPerf.test_lbr == conds(i);
+    if Clx_id == 11
+        loc = ZemPerf.test_lbr == conds(i) & ZemPerf.WinSize == 24;
+    else
+        loc = ZemPerf.test_lbr == conds(i);
+    end
     T(i, 20) = nanmean(ZemPerf.kappa(loc));
     T(i, 21:23) = nanmean(ZemPerf.kappa_class(loc, :));
 end
