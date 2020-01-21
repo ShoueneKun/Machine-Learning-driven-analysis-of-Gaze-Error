@@ -23,10 +23,13 @@ ELC metric can be found [here](https://bitbucket.org/GeorgeARYoung/elc_metric/sr
 ----------------------------
 ## Basic instructions:
 
-Please clone this repository and modify the path.json file.<br/>
-path2repo: Paste the full path to the cloned repository.<br/>
-path2data: Paste the full path to the folder containing ProcessData and LabelData<br/>
-path2vids: Paste the full path to the folder containing the videos.<br/>
+Please clone this repository and modify the path.json file.
+
+path2repo: Paste the full path to the cloned repository.
+
+path2data: Paste the full path to the folder containing ProcessData and LabelData.
+
+path2vids: Paste the full path to the folder containing the videos.
 
 ----------------------------
 ## Handy tools:
