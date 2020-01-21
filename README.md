@@ -14,10 +14,11 @@ This repository contains the code used to process, generate and maintain the GIW
 
 All streams are time synced and provided in a simple data structure, henceforth called, [ProcessData], which is a MATLAB structure. Each [ProcessData] may or may not have a corresponding [LabelData] which holds information about the labels.
 
-To download [ProcessData] and [LabelData] please click here.
-To download the pupil labels scene view and registered depth data, please click here.
+To download all data files, please visit the project [webpage](http://www.cis.rit.edu/~rsk3900/gaze-in-wild/).
 
 The raw data is well over 14TB and will not be provided over the internet. Please contact the authors for specific information or access to the raw data.
+
+ELC metric can be found [here](https://bitbucket.org/GeorgeARYoung/elc_metric/src/master/)
 
 ----------------------------
 ## Basic instructions:
@@ -55,13 +56,13 @@ This script runs the labeller.m script which opens the labeller available to the
 ---------------------------
 ## ML:
 
-To fully reproduce our baseline results, you will need to create staging data. This staging data is used to rapidly read information to and from Python and MATLAB.
+To fully reproduce our baseline results, you will need to create staging data. This staging data is used to rapidly read information to and from Python and MATLAB. Note that you will need to change paths where indicate in each individual code files. Future work may include simplying the code base if requested by researchers.
 
-Run "GenerateStagingData.m". This should produce two data files called "Data_RF.mat" and "Data_RNN.m".
+Run "ML/RF/AssimilateDataset.m". This should produce "Data_RF.mat" which is used to train seperate RF models for each individual subject. Note that RF models are very large and consume significant RAM. This makes them difficult to deploy. To begin training RF models, run the script "ML/sproc_run.sh".
 
-Run "train_RF.m". This produces a seperate RF model for each individual subject. Note that RF models are very large and consume significant RAM. This makes them difficult to deploy.
+Run "ML/DeepModels/AssimilateDataset.m". This should produce a file named "Data.mat". To boost training, this file is further optimized using the script "ML/DeepModels/ConvMat2Pkl.py". To train all models from scratch, please follow script "main_kfold.py".
 
-Run "train_RNN.sh". This trains K models per subject.
+Pretrained models are available at the project page.
 
 ---------------------------
 If you liked our work or wish to provide any feedback, please email me at rsk3900@rit.edu.
