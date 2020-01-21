@@ -23,10 +23,10 @@ ELC metric can be found [here](https://bitbucket.org/GeorgeARYoung/elc_metric/sr
 ----------------------------
 ## Basic instructions:
 
-Please clone this repository and modify the path.json file.
-path2repo: Paste the full path to the cloned repository.
-path2data: Paste the full path to the folder containing ProcessData and LabelData
-path2vids: Paste the full path to the folder containing the videos.
+Please clone this repository and modify the path.json file.<br/>
+path2repo: Paste the full path to the cloned repository.<br/>
+path2data: Paste the full path to the folder containing ProcessData and LabelData<br/>
+path2vids: Paste the full path to the folder containing the videos.<br/>
 
 ----------------------------
 ## Handy tools:
@@ -34,9 +34,10 @@ path2vids: Paste the full path to the folder containing the videos.
 To easily get started, we provide access to five utilities to rapidly visualize the data.
 
 #### PlotLabels.m
-Unless manually choosing a particular subject, this script will plot the labels overlaid on top of the head and eye-in-head velocities.
+Unless manually choosing a particular subject, this script will plot all labels overlaid on top of head and eye-in-head velocities.
 
 #### GIWapp
+
 This is a MATLAB app designed to strafe through the vast amount of data rapidly.
 Please following these instructions;
 1. Open the GIWapp.
@@ -56,13 +57,16 @@ This script runs the labeller.m script which opens the labeller available to the
 ---------------------------
 ## ML:
 
-To fully reproduce our baseline results, you will need to create staging data. This staging data is used to rapidly read information to and from Python and MATLAB. Note that you will need to change paths where indicate in each individual code files. Future work may include simplying the code base if requested by researchers.
+To fully reproduce our baseline results, you will need to create staging data. This staging data is used to rapidly read information to and from Python and MATLAB. Note that you will need to change paths where indicated in each individual code file. Future work may include simplying the code base if requested by researchers. All machine learning operations for this project are conducted with the aid of SLURM, a job scheduling package retrofitted for [Research and Computing](https://www.rit.edu/researchcomputing/) at RIT. 
 
-Run "ML/RF/AssimilateDataset.m". This should produce "Data_RF.mat" which is used to train seperate RF models for each individual subject. Note that RF models are very large and consume significant RAM. This makes them difficult to deploy. To begin training RF models, run the script "ML/sproc_run.sh".
+# Result replication
+If you wish to replicate results by training from scratch, please run all files listed below for every testing condition.
 
-Run "ML/DeepModels/AssimilateDataset.m". This should produce a file named "Data.mat". To boost training, this file is further optimized using the script "ML/DeepModels/ConvMat2Pkl.py". To train all models from scratch, please follow script "main_kfold.py".
+Run "ML/RF/AssimilateDataset.m". This should produce "ML/RF/Data/Data_RF.mat" which is used to train seperate RF models for each individual subject. Note that RF models are very large and consume significant RAM. This makes them difficult to deploy. To begin training RF models, run the script "ML/RF_Model.m".
 
-Pretrained models are available at the project page.
+Run "ML/DeepModels/AssimilateDataset.m". This should produce a file named "ML/DeepModels/Data/Data.mat". To boost training, this file is further optimized using the script "ML/DeepModels/ConvMat2Pkl.py". To train all models from scratch, please follow script "main_kfold.py". Note that this process is time intensive and would be easier if you have access to SLURM (if you do, please run "ML/DeepModels/submit_jobs_kfold.sh").
+
+Pretrained models are available [here](https://drive.google.com/open?id=176sbXB3sXF-gJqZEhWEV-OxQtgtXKq_P).
 
 ---------------------------
 If you liked our work or wish to provide any feedback, please email me at rsk3900@rit.edu.
