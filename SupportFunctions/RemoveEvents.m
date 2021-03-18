@@ -49,20 +49,6 @@ function LabelStruct = RemoveEvents(LabelStruct, ProcessData, isX)
     %% Delete improbable events
     LabelStruct(loc1 | loc2) = [];
     
-    %% Fix Saccades start and ends
-    if ~isX
-        % Note that this process does not apply to the output from
-        % classifiers. This process simply improves the Saccade onset and
-        % offset locations made by labellers.
-        
-        % Reason for correction: Due to filtering, Saccade velocity curve
-        % tends to flatten out. Certain labellers used that as a metric to
-        % mark the onset and offset. However, ideally a labeller should
-        % also take into account the angular displacement - which does not
-        % happen in a few cases.
-        [LabelStruct, ~] = cleanSaccades(LabelStruct, ProcessData);
-    end
-    
     EventProps = getEventProps(LabelStruct, ProcessData);
     loc = (EventProps.n2 - EventProps.n1) <= curThres;
     LabelStruct(loc) = [];
