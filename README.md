@@ -14,9 +14,7 @@ This repository contains the code used to process, generate and maintain the GIW
 
 All streams are time synced and provided in a simple data structure, henceforth called, [ProcessData], which is a MATLAB structure. Each [ProcessData] may or may not have a corresponding [LabelData] which holds information about the labels.
 
-To download all data files, please visit the project [webpage](http://www.cis.rit.edu/~rsk3900/gaze-in-wild/).
-
-The raw data is well over 14TB and will not be provided over the internet. Please contact the authors for specific information or access to the raw data.
+To download all data files, please visit the project [webpage](http://www.cis.rit.edu/~rsk3900/gaze-in-wild/). The official list of participants, tasks and availability of labels can be found in the supplementary document [here](https://www.nature.com/articles/s41598-020-59251-5#Sec33). The raw data is well over 14TB and will not be provided over the internet. Please contact the authors for specific information or access to the raw data.
 
 ELC metric can be found [here](https://bitbucket.org/GeorgeARYoung/elc_metric/src/master/)
 
