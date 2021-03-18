@@ -8,13 +8,16 @@ clc
 %% Relevant paths
 Path2Repo = '/home/rakshit/Documents/MATLAB/gaze-in-wild';
 addpath(genpath(fullfile(Path2Repo, 'SupportFunctions')))
-txt = fscanf(fopen(fullfile(Path2Repo, 'path.json'), 'rb'), '%s');
-path_struct = jsondecode(txt);
+% txt = fscanf(fopen(fullfile(Path2Repo, 'path.json'), 'rb'), '%s');
+% path_struct = jsondecode(txt);
 
 global Path2ProcessData Path2LabelData
 
-Path2ProcessData = fullfile(path_struct.path2data, 'ProcessData');
-Path2LabelData = fullfile(path_struct.path2data, 'Labels');
+% Path2ProcessData = fullfile(path_struct.path2data, 'ProcessData');
+% Path2LabelData = fullfile(path_struct.path2data, 'Labels');
+
+Path2ProcessData = '/media/rakshit/tank/FinalSet/ProcessData_cleaned';
+Path2LabelData = '/media/rakshit/tank/FinalSet/Labels';
 
 ParticipantInfo = GetParticipantInfo();
 loc = cellfun(@isempty, {ParticipantInfo.Name});

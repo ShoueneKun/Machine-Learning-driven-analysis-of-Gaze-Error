@@ -3,13 +3,16 @@ close all
 clc
 
 %% Relevant paths
-txt = fscanf(fopen('path.json', 'rb'), '%s');
-path_struct = jsondecode(txt);
+% txt = fscanf(fopen('path.json', 'rb'), '%s');
+% path_struct = jsondecode(txt);
 
 global Path2ProcessData Path2LabelData
 
-Path2ProcessData = fullfile(path_struct.path2data, 'ProcessData');
-Path2LabelData = fullfile(path_struct.path2data, 'Labels');
+% Path2ProcessData = fullfile(path_struct.path2data, 'ProcessData');
+% Path2LabelData = fullfile(path_struct.path2data, 'Labels');
+
+Path2ProcessData = '/media/rakshit/tank/GIW_rearranged/Indoor_Walk/ProcessData_cleaned';
+Path2LabelData = '/media/rakshit/tank/GIW_rearranged/Indoor_Walk/Labels';
 
 % Get information regarding each participant
 ParticipantInfo = GetParticipantInfo();
@@ -77,7 +80,7 @@ for i = 1:length(D_pd)
             numSac = sum([LabelData.LabelStruct.Label] == 3);
             fprintf('F: %d, P: %d, S: %d. PrIdx: %d, TrIdx: %d, LbrIdx: %d\n', numFix, numPur, numSac, data(1), data(2), data(3))
         end
-        linkaxes(ax{j}, 'xy')
+        linkaxes([ax{:}], 'xy')
     else
        % Labels do not exist
        disp(['No labels for Person: ', num2str(PrIdx), ' Trial: ', num2str(TrIdx)])

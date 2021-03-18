@@ -15,4 +15,5 @@
 *.pkl
 *.lock
 *.pyc
+/temp
 */__pycache__/*

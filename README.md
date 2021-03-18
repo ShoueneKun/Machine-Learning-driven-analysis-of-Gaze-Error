@@ -10,7 +10,7 @@ This repository contains the code used to process, generate and maintain the GIW
 
 * Depth data: We used a ZED depth camera to capture depth information at 1080p and 30Hz. A checkerboard is used to registed the ZED camera and Pupil labs scene camera into the same coordination space. This enables us to compute a 3D Point-of-Regard.
 
-* Labels: Each stream is labeled by one or multiple human annotaters. Certain trials do not contain labels.
+* Labels: Each stream is labeled by one or multiple human annotaters. Certain trials do not contain labels. Certain trials are partially labelled. 
 
 All streams are time synced and provided in a simple data structure, henceforth called, [ProcessData], which is a MATLAB structure. Each [ProcessData] may or may not have a corresponding [LabelData] which holds information about the labels.
 
@@ -74,4 +74,11 @@ Pretrained models are available [here](https://drive.google.com/open?id=176sbXB3
 ---------------------------
 If you liked our work or wish to provide any feedback, please email me at rsk3900@rit.edu.
 
-If you use this codebase or dataset in your work, please cite this [paper](https://arxiv.org/abs/1905.13146).
+If you use this codebase or dataset in your work, please cite this [paper](https://www.nature.com/articles/s41598-020-59251-5).
+
+---------------------------
+## Updates
+
+1. A bug was found in the preprocessing step which resulted in doubling of pupil radius values. Please be sure to divide this measurement by 2.
+2. Added MIT license file.
+

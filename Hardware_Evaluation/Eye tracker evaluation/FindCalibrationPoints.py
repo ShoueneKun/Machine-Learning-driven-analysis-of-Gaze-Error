@@ -4,6 +4,7 @@ import pandas as pd
 import json
 import sys
 import os
+
 from scipy.spatial.distance import cdist
 
 mateng = matlab.engine.start_matlab()
@@ -17,10 +18,14 @@ PATH_TO_INTRINSICS = os.path.join(PATH_TO_REPO, 'Camera_Calibration')
 
 # Remove participants 7 and 21 from analysis
 list_names = list(range(1, 24))
+
+list_names.remove(4)
+list_names.remove(5)
 list_names.remove(7)
 list_names.remove(21)
 
 sys.path.append(os.path.join(PATH_TO_REPO, 'SupportFunctions', 'PythonSupport'))
+
 from HelperFunctions import load_object, findClosest
 from transformations import random_rotation_matrix, quaternion_matrix
 

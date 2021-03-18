@@ -1,5 +1,4 @@
 import pickle
-import logger
 import numpy as np
 import msgpack
 import sklearn.metrics
@@ -22,7 +21,7 @@ def load_object(file_path, allow_legacy=True):
             if not allow_legacy:
                 raise e
             else:
-                logger.info('{} has a deprecated format: Will be updated on save'.format(file_path))
+                print('{} has a deprecated format: Will be updated on save'.format(file_path))
                 data = _load_object_legacy(file_path)
         finally:
             gc.enable()
@@ -35,7 +34,7 @@ def save_object(object_, file_path):
         # to hold a fn interal temp var.
         if isinstance(o, np.ndarray):
             if not _warned[0]:
-                logger.warning("numpy array will be serialized as list. Invoked at:\n"+''.join(tb.format_stack()))
+                print("numpy array will be serialized as list")
                 _warned[0] = True
             return o.tolist()
         return o
@@ -59,6 +58,99 @@ def findClosest(datapt, seq):
     #return np.argmin(np.lingalg.norm(seq - datapt, axis=axval))
     return np.argmin(np.abs(seq - datapt))
 
+def convert_ProcessData_to_pycompat(ProcessData):
+    out = {}
+    out['PrIdx'] = ProcessData[0][0][0]
+    out['TrIdx'] = ProcessData[0][0][1]
+    out['SR']    = ProcessData[0][0][2]
+    out['T']     = ProcessData[0][0][3]
+
+    out['depth_present'] = ProcessData[0][0][5]
+
+    # if out['depth_present'].item()  == 1:
+    #     out['calib_flag'] = ProcessData[0][0][6]
+
+    #     out['depth_at_fix'] = ProcessData[0][0][14]
+
+    #     # Set IMU data
+    #     out['IMU'] = {}
+    #     out['IMU']['vel'] = ProcessData[0][0][7][0][0][0]
+    #     out['IMU']['vec'] = ProcessData[0][0][7][0][0][1]
+    #     out['IMU']['el_vel'] = ProcessData[0][0][7][0][0][1]
+    #     out['IMU']['az_vel'] = ProcessData[0][0][7][0][0][1]
+    #     out['IMU']['pose'] = ProcessData[0][0][7][0][0][1]
+    #     out['IMU'] = convert_all_items_to_numpy(out['IMU'])
+
+    #     # Set ETG data
+    #     out['ETG'] = {}
+    #     out['ETG']['res'] = ProcessData[0][0][8][0][0][0]
+    #     out['ETG']['vel'] = ProcessData[0][0][8][0][0][1]
+    #     out['ETG']['vec'] = ProcessData[0][0][8][0][0][2]
+    #     out['ETG']['el_vel'] = ProcessData[0][0][8][0][0][3]
+    #     out['ETG']['az_vel'] = ProcessData[0][0][8][0][0][4]
+    #     out['ETG']['fr_scene'] = ProcessData[0][0][8][0][0][5]
+    #     out['ETG']['fr_eye0'] = ProcessData[0][0][8][0][0][6]
+    #     out['ETG']['fr_eye1'] = ProcessData[0][0][8][0][0][7]
+    #     out['ETG']['screen_pos'] = ProcessData[0][0][8][0][0][8]
+    #     out['ETG']['confidence'] = ProcessData[0][0][8][0][0][9]
+    #     out['ETG']['vergence'] = ProcessData[0][0][8][0][0][12]
+    #     out['ETG']['pupil_radius_0'] = ProcessData[0][0][8][0][0][18]
+    #     out['ETG']['pupil_radius_1'] = ProcessData[0][0][8][0][0][19]
+    #     out['ETG'] = convert_all_items_to_numpy(out['ETG'])
+
+    #     # Set GIW data
+    #     out['GIW'] = {}
+    #     out['GIW']['vel'] = ProcessData[0][0][15][0][0][5]
+    #     out['GIW']['vec'] = ProcessData[0][0][15][0][0][0]
+    #     out['GIW']['el_vel'] = ProcessData[0][0][15][0][0][4]
+    #     out['GIW']['az_vel'] = ProcessData[0][0][15][0][0][3]
+    #     out['GIW']['pose'] = ProcessData[0][0][15][0][0][1]
+    #     out['GIW'] = convert_all_items_to_numpy(out['GIW'])
+    # else:
+    #     # Set IMU data
+    #     out['IMU'] = {}
+    #     out['IMU']['vel'] = ProcessData[0][0][7][0][0][0]
+    #     out['IMU']['vec'] = ProcessData[0][0][7][0][0][1]
+    #     out['IMU']['el_vel'] = ProcessData[0][0][7][0][0][1]
+    #     out['IMU']['az_vel'] = ProcessData[0][0][7][0][0][1]
+    #     out['IMU']['pose'] = ProcessData[0][0][7][0][0][1]
+    #     out['IMU'] = convert_all_items_to_numpy(out['IMU'])
+
+    #     # Set ETG data
+    #     out['ETG'] = {}
+    #     out['ETG']['res'] = ProcessData[0][0][8][0][0][0]
+    #     out['ETG']['vel'] = ProcessData[0][0][8][0][0][1]
+    #     out['ETG']['vec'] = ProcessData[0][0][8][0][0][2]
+    #     out['ETG']['el_vel'] = ProcessData[0][0][8][0][0][3]
+    #     out['ETG']['az_vel'] = ProcessData[0][0][8][0][0][4]
+    #     out['ETG']['fr_scene'] = ProcessData[0][0][8][0][0][5]
+    #     out['ETG']['fr_eye0'] = ProcessData[0][0][8][0][0][6]
+    #     out['ETG']['fr_eye1'] = ProcessData[0][0][8][0][0][7]
+    #     out['ETG']['screen_pos'] = ProcessData[0][0][8][0][0][8]
+    #     out['ETG']['confidence'] = ProcessData[0][0][8][0][0][9]
+    #     out['ETG']['vergence'] = ProcessData[0][0][8][0][0][12]
+    #     out['ETG']['pupil_radius_0'] = ProcessData[0][0][8][0][0][18]
+    #     out['ETG']['pupil_radius_1'] = ProcessData[0][0][8][0][0][19]
+    #     out['ETG'] = convert_all_items_to_numpy(out['ETG'])
+
+    #     # Set GIW data
+    #     out['GIW'] = {}
+    #     out['GIW']['vel'] = ProcessData[0][0][12][0][0][5]
+    #     out['GIW']['vec'] = ProcessData[0][0][12][0][0][0]
+    #     out['GIW']['el_vel'] = ProcessData[0][0][12][0][0][4]
+    #     out['GIW']['az_vel'] = ProcessData[0][0][12][0][0][3]
+    #     out['GIW']['pose'] = ProcessData[0][0][12][0][0][1]
+    #     out['GIW'] = convert_all_items_to_numpy(out['GIW'])
+
+    out = convert_all_items_to_numpy(out)
+    return out
+
+
+def convert_all_items_to_numpy(dictdata):
+    for key, item in dictdata.items():
+        if type(item) is not dict:
+            dictdata[key] = np.array(dictdata[key]).squeeze()
+    return dictdata
 
 def getPerformance(y_true, y_pred, calc_evt):
     # Return all relevant performance metrics
